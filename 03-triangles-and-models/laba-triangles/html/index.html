@@ -1,0 +1,289 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Triangles & Models </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Triangles & Models</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Triangles </a>
+          <a class="item" data-tab="step03"> Triangle Strips & Fans </a>
+          <a class="item" data-tab="step04"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Experiment with TRIANGLE primitives</p>
+</li>
+<li>
+<p>Explore the implications of winding, and in particular the glFrontFace and glPplygonMode</p>
+</li>
+<li>
+<p>Review a solution to the model load problem in the last lab</p>
+</li>
+<li>
+<p>Recode this solution using more modern data structures</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Triangles</h2>
+<ul>
+<li>
+<p>Create a new project - called lab03a_triangles - by copying an existing project as before</p>
+</li>
+<li>
+<p>Insert this standard skeleton code:</p>
+</li>
+</ul>
+<pre><code>#include &quot;libopengl.h&quot;
+
+void renderScene(void)
+{
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  glFlush();
+}
+
+void setupRC(void)
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glColor3f(0.0f, 1.0f, 0.0f);
+  glOrtho (-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+}
+
+int main(int argc, char* argv[])
+{
+  glutInit(&amp;amp;argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+  glutCreateWindow(&quot;Lab 05&quot;);
+  glutDisplayFunc(renderScene);
+
+  setupRC();
+
+  glutMainLoop();
+
+  return 0;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Create a new method triangle and invoke it from renderScene.</p>
+</li>
+<li>
+<p>Display two triangles using this code:</p>
+</li>
+</ul>
+<pre><code>  glBegin(GL_TRIANGLES);
+
+    glVertex2f(0.0f, 0.0f);    // V0
+    glVertex2f(25.0f, 25.0f);  // V1
+    glVertex2f(50.0f, 0.0f);   // V2
+
+    glVertex2f(-50.0f, 0.0f);  // V3
+    glVertex2f(-75.0f, 50.0f); // V4
+    glVertex2f(-25.0f, 0.0f);  // V5
+
+  glEnd();
+</code></pre>
+
+<ul>
+<li>Build and test</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Triangle Strips &amp; Fans</h2>
+<ul>
+<li>Use a triangle strips instead of discreet triangles:</li>
+</ul>
+<pre><code>  glBegin(GL_TRIANGLE_STRIP);
+    glVertex2f(0.0f, 0.0f);    // V0
+    glVertex2f(50.0f, 0.0f);   // V1
+    glVertex2f(25.0f, 25.0f);  // V2
+    glVertex2f(75.0f, 25.0f);  // V3
+    glVertex2f(50.0f, 50.0f);  // V4
+  glEnd();
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>When using strips, the triangles will be drawn using solid colours, making it difficult to identify the triangles.</p>
+</li>
+<li>
+<p>This mode of rendering can be changed using this api call:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glPolygonMode.xml">glPolygonMode</a></p>
+</li>
+<li>
+<p>In setupRC, set the mode for the front of the polygons to be line only (and not fill):</p>
+</li>
+</ul>
+<pre><code>  glPolygonMode(GL_FRONT,GL_LINE);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>Now try building a triangle using a fan:</p>
+</li>
+</ul>
+<pre><code>    glVertex2f(0.0f, 0.0f);
+    glVertex2f(0.0f, 50.0f);
+    glVertex2f(25.0f, 30.0f);
+    glVertex2f(40.0f, 0.0f);
+    glVertex2f(25.0f, -30.0f);
+</code></pre>
+
+<ul>
+<li>Again we note that the polygon seem to have reverted to solid. Include this in the setupRC function:</li>
+</ul>
+<pre><code>  glPolygonMode(GL_BACK,GL_LINE);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. Can you explain why it is now no longer solid?</p>
+</li>
+<li>
+<p>We can also use the fan to render a cricle:</p>
+</li>
+</ul>
+<pre><code>  glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    float x, y, angle;
+    for(angle = 0.0f; angle &lt; (2.0f*M_PI); angle += (M_PI/8.0f))
+    {
+      x = 50.0f*sin(angle);
+      y = 50.0f*cos(angle);
+
+      glVertex2f(x, y);
+    }
+  glEnd();
+</code></pre>
+
+<ul>
+<li>Have a close look at this code - note in particular we are using glVertex3f and also glVertex2f in the same function. Does this make any difference?</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>04: Exercises</h2>
+<h2>1. Load GL_LINE_STRIP vertex data</h2>
+<ul>
+<li>This is one solution to the an exercise in lab04 to load vertices from disk:</li>
+</ul>
+<pre><code>void loadAndDrawLineStrip(char * fileName)
+{
+  fstream inStream;
+  inStream.open(fileName, ios ::in);  // open the file
+  if(inStream.fail())
+    return;
+  glClear(GL_COLOR_BUFFER_BIT);      // clear the screen
+  GLint numpolys, numLines, x ,y;
+  inStream &gt;&gt; numpolys;              // read the number of polylines
+  for(int j = 0; j &lt; numpolys; j++)  // read each polyline
+  {
+    inStream &gt;&gt; numLines;
+    glBegin(GL_LINE_STRIP);      // draw the next polyline
+    for (int i = 0; i &lt; numLines; i++)
+    {
+      inStream &gt;&gt; x &gt;&gt; y;        // read the next x, y pair
+      glVertex2i(x, y);
+    }
+    glEnd();
+  }
+  glFlush();
+  inStream.close();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Incorporate this into your lab exercise, and verify that you can load sample vertex file (use some of the txt files from lab 04 exercises).</p>
+</li>
+<li>
+<p>Refactor this code to decouple the loading of the vertex data from subsequent rendering. </p>
+</li>
+<li>
+<p>Use simple C arrays</p>
+</li>
+<li>
+<p>One method should load the model data and return a 2D array, one row per vertex series (line loop). </p>
+</li>
+<li>
+<p>A second method should accept this 2D array and render it.</p>
+</li>
+</ul>
+<h2>2. STL</h2>
+<ul>
+<li>
+<p>The Standard Template Library is a more effective library for managing data structures. For simple arrays, it is generally recommended that the stl class vec be used. Refactor the implementation in 2 above to use vec instead of built in arrays. This tutorial <a href="http://www.cprogramming.com/tutorial/stl/vector.html">here</a></p>
+</li>
+<li>
+<p>Now look at this tutorial <a href="http://www.cprogramming.com/tutorial/stl/iterators.html">here</a></p>
+</li>
+</ul>
+<h2>3. Triangles, Strips and Fans</h2>
+<ul>
+<li>Redesign your model loading algorithm to be able to read not just line loops, but other primitives covered in this lab. This will require a revision of the file format to include a code to indicate primitive type.</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

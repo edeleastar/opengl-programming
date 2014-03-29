@@ -1,0 +1,558 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Transformation </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Transformation</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Nucleus </a>
+          <a class="item" data-tab="step04"> Electron </a>
+          <a class="item" data-tab="step05"> Vector </a>
+          <a class="item" data-tab="step06"> renderElectron </a>
+          <a class="item" data-tab="step07"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Render a simple animation of a nucleus with a orbiting electron</p>
+</li>
+<li>
+<p>Extend this scene to include multiple electrons, orbiting at different rates</p>
+</li>
+<li>
+<p>Encapsulate suitable abstractions to enable animation code to be concise and expressive</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Create a project - lab05b - in the usual way.</p>
+</li>
+<li>
+<p>This is the initial started code:</p>
+</li>
+</ul>
+<pre><code>#include &quot;libopengl.h&quot;
+
+void renderScene(void)
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glutSolidSphere(10.0f, 15, 15);
+
+  glutSwapBuffers();
+}
+
+void setupRC()
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glEnable(GL_DEPTH_TEST);
+  glFrontFace(GL_CCW);
+  glEnable(GL_CULL_FACE);
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho (-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+void timerFunc(int value)
+{
+  glutPostRedisplay();
+  glutTimerFunc(50, timerFunc, 1);
+}
+
+int main(int argc, char* argv[])
+{
+  glutInit(&amp;amp;argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+
+  glutInitWindowSize(400,400);
+  glutCreateWindow(&quot;Lab 05b&quot;);
+  glutDisplayFunc(renderScene);
+  setupRC();
+  timerFunc(50);
+  glutMainLoop();
+
+  return 0;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>You should already have a "utils" project within your workspace. This currently just contains a single header file. We will start to accumulate some general purpose code in this project now.</p>
+</li>
+<li>
+<p>First, a simple class to encapsulate colours:</p>
+</li>
+</ul>
+<pre><code>#pragma once
+
+struct Color
+{
+  float R;
+  float G;
+  float B;
+  float A;
+
+  static Color White;
+  static Color Yellow;
+  static Color Red;
+  static Color Magenta;
+  static Color Cyan;
+  static Color Green;
+  static Color Black;
+  static Color Blue;
+
+
+  Color();
+  Color(float r, float g, float b, float a=1.0f);
+  Color(int r, int g, int b, int a=255);
+
+  void render();
+  void renderClear();
+};
+</code></pre>
+
+<ul>
+<li>
+<p>pragma once is a directive to ensure that this header is included only once in any given source compile. It prevents multiple symbol declaration errors.</p>
+</li>
+<li>
+<p>The implementation of this class:</p>
+</li>
+</ul>
+<pre><code>#include &quot;libopengl.h&quot;
+#include &quot;Color.h&quot;
+
+Color Color::Black   (0,     0,    0);
+Color Color::Blue    (0,     0,  255);
+Color Color::Green   (0,   255,    0);
+Color Color::Cyan    (0,   255,  255);
+Color Color::Red     (255,   0,    0);
+Color Color::Magenta (255,   0,  255);
+Color Color::Yellow  (255, 255,    0);
+Color Color::White   (255, 255,  255);
+
+
+Color::Color()
+{
+  R = G = B = A = 1.0f;
+}
+
+Color::Color(float r, float g, float b, float a)
+{
+  R = r;
+  G = g;
+  B = b;
+  A = a;
+}
+
+Color::Color(int r, int g, int b, int a)
+{
+  R = (float) r / 255.0f;
+  G = (float) g / 255.0f;
+  B = (float) b / 255.0f;
+  A = (float) a / 255.0f;
+}
+
+void Color::render()
+{
+  glColor4f(R,G,B,A);
+}
+
+void Color::renderClear()
+{
+  glClearColor(R,G,B, 1.0f);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Read this code carefully. Note the definition of the static members, a short hand for named colours.</p>
+</li>
+<li>
+<p>We only have 8 named colours. Here is a table of standard colour values:</p>
+</li>
+<li>
+<p>http://cloford.com/resources/colours/namedcol.htm</p>
+</li>
+<li>
+<p>You could extend the above set to include at least the VGA set from this table</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Nucleus</h2>
+<ul>
+<li>In electron, we can start to make our code more expressive by using this simple wrapper. In renderScene and setupRC, replace the call to gl primitives:</li>
+</ul>
+<pre><code>  //glColor3f(1.0f, 0.0f, 0.0f);
+  Color::Red.render();
+
+  //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  Color::Black.renderClear();
+</code></pre>
+
+<ul>
+<li>Build. The build will fail, and you may get errors from eclipse like this:</li>
+</ul>
+<pre><code>g++ -framework GLUT -framework OpenGL -o &quot;lab09&quot;  ./src/electron.o   
+Undefined symbols:
+...
+ld: symbol(s) not found
+collect2: ld returned 1 exit status
+make: *** [lab09] Error 1
+</code></pre>
+
+<ul>
+<li>
+<p>Although utils is on the header path, the project is not linked to our lab05b project.</p>
+</li>
+<li>
+<p>To link, edit the project properties, and select //C++ Build-&gt;Settings-&gt;C++ Linker-&gt;Libraries//</p>
+</li>
+<li>
+<p>Add utils as a library (top panel) and place the utils/debug folder on the library search path (lower panel)</p>
+</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>
+<p>Build and test. A Solid red sphere should be in the centre of a black canvas.</p>
+</li>
+<li>
+<p>If you are having difficulty with the link, just incorporate color.-  directly into your lab05b project</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Electron</h2>
+<ul>
+<li>In renderScene, introduce the following after the nucleus (red sphere) has been rendered:</li>
+</ul>
+<pre><code>  Color::Green.render();
+  glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
+  glTranslatef(90.0f, 0.0f, 0.0f);
+  glutSolidSphere(6.0f, 15, 15);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. Notice that the nucleus briefly appeared, and then flashed off to the right.</p>
+</li>
+<li>
+<p>Refactor the code to isolate the transformation matrix for the electron:</p>
+</li>
+</ul>
+<pre><code>  glPushMatrix();
+    Color::Green.render();
+    glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
+    glTranslatef(90.0f, 0.0f, 0.0f);
+    glutSolidSphere(6.0f, 15, 15);
+  glPopMatrix();
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. This should cause the nucleus and electron to appear steady.</p>
+</li>
+<li>
+<p>Note that renderScene is being called 50 times a second (see the timer call in main). We can use this to make the electron revolve around the nucleus.</p>
+</li>
+<li>
+<p>Declare a static int angle inside renderScene:</p>
+</li>
+</ul>
+<pre><code>  static int angle = 0;
+</code></pre>
+
+<ul>
+<li>In the call to rotate, use this variable:</li>
+</ul>
+<pre><code>    glRotatef(angle, 0.0f, 1.0f, 0.0f);
+</code></pre>
+
+<ul>
+<li>and finally, increment this angle on every call, resetting to 0 if it exceeds 360:</li>
+</ul>
+<pre><code>  angle = (angle + 10) % 360;
+</code></pre>
+
+<ul>
+<li>Build and test</li>
+</ul>
+<h2>Exercise 1</h2>
+<ul>
+<li>
+<p>Introduce another electron into the animation. This one is to be orbiting on a different plan, say at 45 degree angle to the X axis.</p>
+</li>
+<li>
+<p>Introduce a third electron, say at a 90 angle to X axis. </p>
+</li>
+<li>
+<p>Try to position each of the above electrons to start their animation at a different point in the orbit.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Vector</h2>
+<ul>
+<li>We already have a Vector class from our assignment 1 shell code:</li>
+</ul>
+<pre><code>struct Vector3
+{
+  float X;
+  float Y;
+  float Z;
+
+  static Vector3 UnitX;
+  static Vector3 UnitY;
+  static Vector3 UnitZ;
+
+  Vector3(float x, float y, float z);
+  Vector3(float value);
+  Vector3();
+  Vector3(std::istream&amp;amp; is);
+
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>The implementation:</li>
+</ul>
+<pre><code>#include &quot;libopengl.h&quot;
+#include &quot;vector3.h&quot;
+#include &quot;utils.h&quot;
+using namespace std;
+
+Vector3 Vector3::UnitX(1.0f, 0.0f, 0.0f);
+Vector3 Vector3::UnitY(0.0f, 1.0f, 0.0f);
+Vector3 Vector3::UnitZ(0.0f, 0.0f, 1.0f);
+
+Vector3::Vector3(float x, float y, float z)
+: X(x)
+, Y(y)
+, Z(z)
+{}
+
+Vector3::Vector3(float value)
+: X(value)
+, Y(value)
+, Z(value)
+{}
+
+Vector3::Vector3()
+: X(0)
+, Y(0)
+, Z(0)
+{}
+
+Vector3::Vector3(istream &amp;amp;is)
+{
+  skipComment(is);
+  is &gt;&gt; X &gt;&gt; Y &gt;&gt; Z;
+}
+
+void Vector3::render()
+{
+  glVertex3f(X, Y, Z);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Copy this code into the utils project. You will also have to bring over the utils.h/cpp file as well</p>
+</li>
+<li>
+<p>We can extend this class to encapsulate the translate and rotate calls:</p>
+</li>
+</ul>
+<pre><code>// Header
+  void translate();
+  void rotate (float angle);
+
+// Implementation
+void Vector3::translate()
+{
+  glTranslatef(X,Y,Z);
+}
+void Vector3::rotate (float angle)
+{
+  glRotatef(angle, X,Y,Z);
+}
+</code></pre>
+
+<ul>
+<li>This classes make the rendering of an electron marginally more expressive:</li>
+</ul>
+<pre><code>  glPushMatrix();
+    Color::Green.render();
+    Vector3::UnitY.rotate(angle);
+    Vector3(90,0,0).translate();
+    glutSolidSphere(6.0f, 15, 15);
+  glPopMatrix();
+</code></pre>
+
+<ul>
+<li>Build and test.</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: renderElectron</h2>
+<ul>
+<li>Before we commence the rotation, we can also skew the orbit 10 degrees around the Z axis:</li>
+</ul>
+<pre><code>   glPushMatrix();
+     Color::Green.render();
+     Vector3::UnitZ.rotate(10);
+     Vector3::UnitY.rotate(angle);
+     Vector3(90,0,0).translate();
+     glutSolidSphere(6.0f, 15, 15);
+   glPopMatrix();
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Note that the last transformation - Vector3(90,0,0).translate() - moves the electron out form the origin by 90, on whatever plane has been established by the previous rotations.</p>
+</li>
+<li>
+<p>The rendering of an electron can be usefully encapsulated in a single method, suitably paramaterised:</p>
+</li>
+</ul>
+<pre><code>void renderElectron(Color color,  float orbitRadius, float orbitAngle, float zSkew)
+{
+  color.render();
+  glPushMatrix();
+    Vector3::UnitZ.rotate(zSkew);
+    Vector3::UnitY.rotate(orbitAngle);
+    Vector3(orbitRadius,0,0).translate();
+    glutSolidSphere(6.0f, 15, 15);
+  glPopMatrix();
+}
+</code></pre>
+
+<ul>
+<li>We can now just call this in renderScene:</li>
+</ul>
+<pre><code>  renderElectron(Color::Green,  90,  angle, 40);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>We can now have multiple electrons orbiting the nucleus:</p>
+</li>
+</ul>
+<pre><code>  renderElectron(Color::Green,  90,  angle, 40);
+  renderElectron(Color::Cyan,   40,  angle, 20);
+</code></pre>
+
+<ul>
+<li>These are rotating at the same rate. Different rates are easily accomplished:</li>
+</ul>
+<pre><code>  static int angle2 = 0;
+  //
+  renderElectron(Color::Cyan,   40,  angle2, 20);
+  //
+  angle2 = (angle2 + 5) % 360;
+</code></pre>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Exercises</h2>
+<h2>Further Electrons</h2>
+<ul>
+<li>Create some more electrons, with different colours, rotations and orbit rates</li>
+</ul>
+<h2>Different orbit velocity</h2>
+<ul>
+<li>
+<p>Having abstracted the rendering of an electron into a function, combine the rendering of the nuclues and a set of electrons into a single function call.</p>
+</li>
+<li>
+<p>Then render multiple atoms on the screen, perhaps one in each quadrant, each with its own set of orbiting electrons.</p>
+</li>
+</ul>
+<h2>Model</h2>
+<ul>
+<li>
+<p>Rework the application to use the model classes we have developed for the assignment.</p>
+</li>
+<li>
+<p>Load from a model a specification for atom, including characteristics of the electrons to be set in orbit around the electron.</p>
+</li>
+<li>
+<p>Allow the model to load multiple atom simulations</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

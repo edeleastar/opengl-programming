@@ -1,0 +1,761 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Triangles & Models </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Triangles & Models</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Simple Model </a>
+          <a class="item" data-tab="step04"> Simple Render </a>
+          <a class="item" data-tab="step05"> Improved Model </a>
+          <a class="item" data-tab="step06"> Improved Render </a>
+          <a class="item" data-tab="step07"> Model Abstractions </a>
+          <a class="item" data-tab="step08"> Model Implementation </a>
+          <a class="item" data-tab="step09"> Model File Format </a>
+          <a class="item" data-tab="step10"> Revised Model Definition </a>
+          <a class="item" data-tab="step11"> Revised Model Implementation </a>
+          <a class="item" data-tab="step12"> Exercise- Model Extension </a>
+          <a class="item" data-tab="step13"> Exercise- Model Revision </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Review the need for a model</p>
+</li>
+<li>
+<p>Review C++ stream input classes</p>
+</li>
+<li>
+<p>Evolve a model format in over a number of iterations:</p>
+</li>
+<li>
+<p>Model 1: Define a simple data structure for loading a model</p>
+</li>
+<li>
+<p>Model 2: Employ STL</p>
+</li>
+<li>
+<p>Model 3: Encapsulate the data structure within a set of classes, allocating behaviors appropriately</p>
+</li>
+<li>
+<p>Model 4: Make file formal extensible</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Your lab02a project should have the ability to load a simple model and render it.</p>
+</li>
+<li>
+<p>Create a new project called lab03b_models by copying/pasting your lab02 project.</p>
+</li>
+<li>
+<p>Delete all of the source files in the new project, and rebuild the project as follows:</p>
+</li>
+</ul>
+<h2>main.cpp:</h2>
+<pre><code>#include &quot;libopengl.h&quot;
+
+void renderScene(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT);
+
+  glFlush();
+}
+
+void setupRC()
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+  glColor3f(0.0f, 1.0f, 0.0f);
+
+  glOrtho(-1.0f, +1.0f, -1.0f, +1.0f, -1.0f, +1.0f);
+}
+
+int main(int argc, char* argv[])
+{
+  glutInit(&amp;amp;argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+  glutCreateWindow(&quot;lab04&quot;);
+  glutInitWindowSize(800, 600);
+  glutDisplayFunc(renderScene);
+  setupRC();
+  glutMainLoop();
+
+  return 0;
+}
+</code></pre>
+
+<h2>simple.h</h2>
+<pre><code>#pragma once
+
+void loadAndDraw(char* fileName);
+</code></pre>
+
+<h2>simple.cpp</h2>
+<pre><code>#include &quot;simple.h&quot;
+#include &quot;libopengl.h&quot;
+#include &lt;fstream&gt;
+#include &lt;vector&gt;
+
+using namespace std;
+
+void loadAndDraw(char * fileName)
+{
+  fstream inStream;
+  inStream.open(fileName, ios::in);
+  if (inStream.fail())
+    return;
+  GLint numpolys, numLines;
+  inStream &gt;&gt; numpolys;
+  for (int j = 0; j &lt; numpolys; j++)
+  {
+    inStream &gt;&gt; numLines;
+    glBegin( GL_LINE_STRIP);
+    for (int i = 0; i &lt; numLines; i++)
+    {
+      float x, y;
+      inStream &gt;&gt; x &gt;&gt; y;
+      glVertex2f(x, y);
+    }
+    glEnd();
+  }
+  inStream.close();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Download <a href="../archives/bighouse.txt">bighouse.txt</a></p>
+</li>
+<li>
+<p>Make the appropriate call to load and draw the house in the renderScene method.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Simple Model</h2>
+<ul>
+<li>Introduce the following abstraction into simple.h:</li>
+</ul>
+<pre><code>struct Vertex
+{
+  float x;
+  float y;
+};
+
+struct LineStrip
+{
+  int size;
+  Vertex *vertices;
+};
+
+struct Model
+{
+  int size;
+  LineStrip* lineStrips;
+};
+</code></pre>
+
+<ul>
+<li>
+<p>Reflect on the contents of bighouse.txt, and relate these structures to its content.</p>
+</li>
+<li>
+<p>Introduce the following function on simple.cpp:</p>
+</li>
+</ul>
+<pre><code>Model loadSimple(char *fileName)
+{
+  Model model;
+
+  fstream inStream;
+  inStream.open(fileName, ios::in);
+  if (inStream.fail())
+    exit(1);
+  inStream &gt;&gt; model.size;
+  model.lineStrips = new LineStrip[model.size];
+  for (int polyIndex = 0; polyIndex &lt; model.size; polyIndex++)
+  {
+    inStream &gt;&gt; model.lineStrips[polyIndex].size;
+    model.lineStrips[polyIndex].vertices = new Vertex[model.lineStrips[polyIndex].size];
+    for (int vertexIndex = 0; vertexIndex &lt; model.lineStrips[polyIndex].size; vertexIndex++)
+    {
+      inStream &gt;&gt; model.lineStrips[polyIndex].vertices[vertexIndex].x &gt;&gt; model.lineStrips[polyIndex].vertices[vertexIndex].y;
+    }
+  }
+  inStream.close();
+
+  return model;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Place the function prototype in simple.h, and in main.cpp call this function to load the bighouse model.</p>
+</li>
+<li>
+<p>Use the debugger to verify that it has been loaded successfully.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Simple Render</h2>
+<ul>
+<li>Here is a method to render the simple model:</li>
+</ul>
+<pre><code>void renderSimple(Model &amp;amp;model)
+{
+  for (int polyIndex=0; polyIndex &lt; model.size; polyIndex++)
+  {
+    glBegin( GL_LINE_STRIP);
+    for (int vertexIndex = 0; vertexIndex &lt; model.lineStrips[polyIndex].size; vertexIndex++)
+    {
+      glVertex2f(model.lineStrips[polyIndex].vertices[vertexIndex].x, model.lineStrips[polyIndex].vertices[vertexIndex].y);
+    }
+    glEnd();
+  }
+}
+</code></pre>
+
+<ul>
+<li>Implement in your project and render the model.</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Improved Model</h2>
+<ul>
+<li>
+<p>We can improve and simplify this model by moving to STL.</p>
+</li>
+<li>
+<p>Crete a new header file -model.h - and rework the model to use vectors:</p>
+</li>
+</ul>
+<pre><code>struct Vertex
+{
+  float x;
+  float y;
+};
+
+struct LineStrip
+{
+  vector&lt;Vertex&gt; vertices;
+};
+
+struct Model
+{
+  vector&lt;LineStrip&gt; lineStrips;
+};
+</code></pre>
+
+<ul>
+<li>Create a new model.cpp file and rework the load method:</li>
+</ul>
+<pre><code>Model loadModel(char *fileName)
+{
+  Model model;
+
+  fstream inStream;
+  inStream.open(fileName, ios::in);
+  if (inStream.fail())
+    exit(1);
+  int numberPolys;
+  inStream &gt;&gt; numberPolys;
+  for (int polyIndex = 0; polyIndex &lt;  numberPolys; polyIndex++)
+  {
+    LineStrip LineStrip;
+    int numberVertices;
+    inStream &gt;&gt; numberVertices;
+    for (int vertexIndex = 0; vertexIndex &lt; numberVertices; vertexIndex++)
+    {
+      Vertex vertex;
+      inStream &gt;&gt; vertex.x &gt;&gt; vertex.y;
+      LineStrip.vertices.push_back(vertex);
+    }
+    model.lineStrips.push_back(LineStrip);
+  }
+  inStream.close();
+
+  return model;
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: Improved Render</h2>
+<ul>
+<li>Implement this model in renderer: </li>
+</ul>
+<pre><code>void renderModel(Model &amp;amp;model)
+{
+  for (unsigned int polyIndex=0; polyIndex &lt; model.lineStrips.size(); polyIndex++)
+  {
+    glBegin( GL_LINE_STRIP);
+    for (unsigned int vertexIndex = 0; vertexIndex &lt; model.lineStrips[polyIndex].vertices.size(); vertexIndex++)
+    {
+      glVertex2f(model.lineStrips[polyIndex].vertices[vertexIndex].x, model.lineStrips[polyIndex].vertices[vertexIndex].y);
+    }
+    glEnd();
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Compare these methods with the simple versions.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Model Abstractions</h2>
+<ul>
+<li>Rethinking the model abstractions, we can introduce behavior into the structures already developed:</li>
+</ul>
+<pre><code>struct Vertex
+{
+  float x;
+  float y;
+
+  Vertex(istream&amp;amp; is);
+  void render();
+};
+
+struct LineStrip
+{
+  vector&lt;Vertex&gt; vertices;
+
+  LineStrip(istream&amp;amp; is);
+  void render();
+};
+
+struct Model
+{
+  vector&lt;LineStrip&gt; lineStrips;
+
+  Model(istream&amp;amp; is);
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>Each of the above takes a reference to an input stream in its constructor, and also implements a render method</li>
+</ul>
+	  </section>
+	  <section data-tab="step08" class="ui tab stacked clarity-book segment">
+	     <h2>07: Model Implementation</h2>
+<h2>Vertex</h2>
+<ul>
+<li>The implementation of Vertex is the simplest:</li>
+</ul>
+<pre><code>Vertex::Vertex(istream &amp;amp;is)
+{
+  is &gt;&gt; x &gt;&gt; y;
+}
+void Vertex::render()
+{
+  glVertex2f(x, y);
+}
+</code></pre>
+
+<ul>
+<li>Note that its constructor reads the cordinates from the stream</li>
+</ul>
+<h2>LineStrip</h2>
+<pre><code>LineStrip::LineStrip(istream &amp;amp;is)
+{
+  int size;
+  is &gt;&gt; size;
+  for (int i = 0; i &lt; size; i++)
+  {
+    Vertex vertex(is);
+    vertices.push_back(vertex);
+  }
+}
+
+void LineStrip::render()
+{
+  glBegin( GL_LINE_STRIP);
+  for (unsigned int i = 0; i &lt; vertices.size(); i++)
+  {
+    vertices[i].render();
+  }
+  glEnd();
+}
+
+</code></pre>
+
+<h2>Model</h2>
+<pre><code>
+Model::Model(istream &amp;amp;is)
+{
+  int size;
+  is &gt;&gt; size;
+  for (int i = 0; i &lt; size; i++)
+  {
+    LineStrip LineStrip(is);
+    lineStrips.push_back(LineStrip);
+  }
+}
+
+void Model::render()
+{
+  for (unsigned int i = 0; i &lt; lineStrips.size(); i++)
+  {
+    lineStrips[i].render();
+  }
+}
+</code></pre>
+
+<ul>
+<li>In the Model constructor we assume that the stream is already opened successfully. </li>
+</ul>
+<h2>Test</h2>
+<ul>
+<li>Here are the relevant parts of the main program to load an display the model.</li>
+</ul>
+<pre><code>Model *model;
+
+void renderScene(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT);
+
+  model-&gt;render();
+
+  glFlush();
+}
+
+void setupRC()
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+  glColor3f(0.0f, 1.0f, 0.0f);
+
+  glOrtho(-1.0f, +1.0f, -1.0f, +1.0f, -1.0f, +1.0f);
+
+  fstream modelStream;
+  modelStream.open(&quot;bighouse.txt&quot;, ios::in);
+  if (modelStream.fail())
+    exit(1);
+  model = new Model(modelStream);
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step09" class="ui tab stacked clarity-book segment">
+	     <h2>08: Model File Format</h2>
+<ul>
+<li>Time for a rethink. Have a look at the following file format:</li>
+</ul>
+<pre><code>#scale
+150 150
+#number of entities
+4
+# 1st entity
+# 0 = line strip
+0
+# number of vertices
+6
+# vertices
+40 40
+40 90
+70 120
+100 90
+100 40
+40 40
+# 2nd entity
+# 0 = line strip
+0
+# number of vertices
+4
+# vertices
+50 100
+50 120
+60 120
+60 110
+</code></pre>
+
+<ul>
+<li>
+<p>This format is a little more flexible - it has room for comments (lines beginning with a #), and also it has room for extension. Currently it supports line strips(via the index 0), but we could extend this later. It also has some meta information like the scale of the drawing (max x and y values);</p>
+</li>
+<li>
+<p>We need a simple way of skiping comment lines on input of the first character in the line. This function here should be adequate:</p>
+</li>
+</ul>
+<pre><code>void skipComment(istream &amp;amp;is)
+{
+  char ch;
+  is &gt;&gt; ch;
+  if (ch == '#')
+  {
+    do
+    {
+      string buf;
+      getline(is, buf);
+      is &gt;&gt; ch;
+    } while (ch == '#');
+  }
+  is.putback(ch);
+}
+</code></pre>
+
+<ul>
+<li>This method will skip over any line beginning with at #, and ensure that the current read cusor is left at the start if a non-comment line. Note the last line puts a character back in the readbuffer so it can be read again.</li>
+</ul>
+	  </section>
+	  <section data-tab="step10" class="ui tab stacked clarity-book segment">
+	     <h2>09: Revised Model Definition</h2>
+<ul>
+<li>Bearing in mind the revised file formant, we will pave the way for an alternative shape by introducing a "marker" for primitive type:</li>
+</ul>
+<pre><code>enum EntityType {LineStripId, TriangleId};
+</code></pre>
+
+<ul>
+<li>... and also placeholders for the scale in the model:</li>
+</ul>
+<pre><code>struct Model
+{
+  int maxX, maxY;
+  vector&lt;LineStrip&gt; lines;
+
+  Model(istream&amp;amp; is);
+  void render();
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step11" class="ui tab stacked clarity-book segment">
+	     <h2>10: Revised Model Implementation</h2>
+<ul>
+<li>
+<p>To suppoer the new format, every time we read we need to skip comments.</p>
+</li>
+<li>
+<p>So in Vertex:</p>
+</li>
+</ul>
+<pre><code>Vertex::Vertex(istream &amp;amp;is)
+{
+  skipComment(is);
+  is &gt;&gt; x &gt;&gt; y;
+}
+</code></pre>
+
+<ul>
+<li>LineStrip:</li>
+</ul>
+<pre><code>LineStrip::LineStrip(istream &amp;amp;is)
+{
+  int size;
+  skipComment(is);
+  is &gt;&gt; size;
+  for (int i = 0; i &lt; size; i++)
+  {
+    Vertex vertex(is);
+    vertices.push_back(vertex);
+  }
+}
+</code></pre>
+
+<ul>
+<li>In Model we also need to read the new scale parameters:</li>
+</ul>
+<pre><code>Model::Model(istream &amp;amp;is)
+{
+  int size;
+  skipComment(is);
+  is &gt;&gt; maxX &gt;&gt; maxY;
+  skipComment(is);
+  is &gt;&gt; size;
+</code></pre>
+
+<ul>
+<li>and also, in the for loop, we need to read the type marker and only create a LineStrip if this is what is indicated:</li>
+</ul>
+<pre><code>    int typeId;
+    skipComment(is);
+    is &gt;&gt; typeId;
+    switch (typeId)
+    {
+      case LineStripId: { LineStrip line(is);
+                          lines.push_back(line);
+                          break;
+                        }
+    }
+</code></pre>
+
+<ul>
+<li>
+<p>The above case statement has only one math - for our singe supported entity type - the Line Strip.</p>
+</li>
+<li>
+<p>All the render methods should be unchanged from the previous version.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step12" class="ui tab stacked clarity-book segment">
+	     <h2>11: Exercise: Model Extension</h2>
+<ul>
+<li>
+<p>Introduce a new entity type - Triangle - which can have code 1.</p>
+</li>
+<li>
+<p>it will always have three vertices.</p>
+</li>
+<li>
+<p>Use this sample here as a guide:</p>
+</li>
+</ul>
+<pre><code>#scale
+150 150
+#number of entities
+4
+# 1st entity
+# 0 = line strip
+0
+# number of vertices
+6
+# vertices
+40 40
+40 90
+70 120
+100 90
+100 40
+40 40
+# 2nd entity
+# 0 = line strip
+0
+# number of vertices
+4
+# vertices
+50 100
+50 120
+60 120
+60 110
+# 3rd entity
+# 1 = triangle
+1
+# 3 vertices
+20 10
+100 22
+22 22
+# 1 = triangle
+1
+# 3 vertices
+120 10
+10 22
+102 22
+</code></pre>
+
+<ul>
+<li>
+<p>Create a new struct Triangle to model this.</p>
+</li>
+<li>
+<p>Implement triangle</p>
+</li>
+<li>
+<p>Store a list of triangles in the model, and extend the render method to display them</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step13" class="ui tab stacked clarity-book segment">
+	     <h2>12: Exercise: Model Revision</h2>
+<ul>
+<li>Structurally, our solution to date looks like this:</li>
+</ul>
+<p><img alt="" src="../img/01.png"></p>
+<ul>
+<li>Our rendering method in the Model class may look like this:</li>
+</ul>
+<pre><code>void Model::render()
+{
+  for (unsigned int i = 0; i &lt; lines.size(); i++)
+  {
+    lines[i].render();
+  }
+  for (unsigned int i = 0; i &lt; triangles.size(); i++)
+  {
+    triangles[i].render();
+  }
+}
+</code></pre>
+
+<ul>
+<li>Implement a refactoring to this structure here:</li>
+</ul>
+<p><img alt="" src="../img/02.png"></p>
+<ul>
+<li>This should deliver a consequent simplification of the render method:</li>
+</ul>
+<pre><code>void Model::render()
+{
+  for (unsigned int i=0; i&lt;entities.size(); i++)
+  {
+    entities[i]-&gt;render();
+  }
+}
+</code></pre>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

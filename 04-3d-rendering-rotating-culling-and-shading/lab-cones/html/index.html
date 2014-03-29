@@ -1,0 +1,411 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Rendering, Rotating, Culling & Shading </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Rendering, Rotating, Culling & Shading</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> SpecialKeys & Rotate </a>
+          <a class="item" data-tab="step04"> Colour </a>
+          <a class="item" data-tab="step05"> Depth Testing </a>
+          <a class="item" data-tab="step06"> Culling </a>
+          <a class="item" data-tab="step07"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Render a 3D object</p>
+</li>
+<li>
+<p>Implement specialKeys function to intercept the arrow keys</p>
+</li>
+<li>
+<p>Rotate the object using these keys</p>
+</li>
+<li>
+<p>Explored two shading models</p>
+</li>
+<li>
+<p>Introduce the Depth buffer and observe its effects</p>
+</li>
+<li>
+<p>Introduce Culling and explore its relationship to Winding.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Create a project call lab04a_cones, with a single source file called "cone.cpp"</p>
+</li>
+<li>
+<p>Incorporate the usual starter code, and have the renderScene display the triangle circle from lab03a:</p>
+</li>
+</ul>
+<pre><code>#define GL_PI 3.1415
+
+void triangleCircle()
+{
+  glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    float x, y, angle;
+    for(angle = 0.0f; angle &lt; (2.0f*GL_PI); angle += (GL_PI/8.0f))
+    {
+      x = 50.0f*sin(angle);
+      y = 50.0f*cos(angle);
+
+      glVertex2f(x, y);
+    }
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>Running the program should display as follows:</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>Renaming to drawCone, refactor this method such that the centre of the circle and the radius are passed as parameters:</li>
+</ul>
+<pre><code>void drawCone(float x, float y, float z, float radius)
+{
+  glBegin(GL_TRIANGLE_FAN);
+
+  glVertex3f(x, y, z);
+  float angle;
+  for(angle = 0.0f; angle &lt; (2.0f*GL_PI); angle += (GL_PI/8.0f))
+  {
+    x = radius*sin(angle);
+    y = radius*cos(angle);
+
+    glVertex2f(x, y);
+  }
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>Now invoke this method with the following parameters:</li>
+</ul>
+<pre><code>  drawCone(0,0,0, 50);
+</code></pre>
+
+<ul>
+<li>Circle should appear as above.</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: SpecialKeys &amp; Rotate</h2>
+<ul>
+<li>
+<p>Have a look at the following glut call:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/resources/libraries/glut/spec3/node54.html#SECTION00089000000000000000">glutSpecialFunc</a></p>
+</li>
+<li>
+<p>This enables a function to be registered to intercept and receive non-alphanumeric keystrokes.</p>
+</li>
+<li>
+<p>Define such a method:</p>
+</li>
+</ul>
+<pre><code>void specialKeys(int key, int x, int y)
+{
+}
+</code></pre>
+
+<ul>
+<li>...register it in main:</li>
+</ul>
+<pre><code>  glutSpecialFunc(specialKeys);
+</code></pre>
+
+<ul>
+<li>
+<p>and verify in the debugger that it is being called.</p>
+</li>
+<li>
+<p>We are going to intercept UP,DOWN,LEFT and RIGHT keys, and use their values to adjust the rotation of the code using this API call:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glRotate.xml">glRotate</a></p>
+</li>
+<li>
+<p>Insert the following code into the specialKeys function:</p>
+</li>
+</ul>
+<pre><code>  int xRot=0,yRot=0;
+
+  xRot = (key == GLUT_KEY_UP)?    -1 : xRot; 
+  xRot = (key == GLUT_KEY_DOWN)?   1 : xRot; 
+  yRot = (key == GLUT_KEY_LEFT)?  -1 : yRot; 
+  yRot = (key == GLUT_KEY_RIGHT)?  1 : yRot;   
+
+  glRotatef(xRot, 1.0f, 0.0f, 0.0f);
+  glRotatef(yRot, 0.0f, 1.0f, 0.0f);
+
+  glutPostRedisplay();
+</code></pre>
+
+<ul>
+<li>Build and test. Experiment with holding one of the arrow keys. E.g. Holding down arrow for a few seconds should yield this display:</li>
+</ul>
+<p><img alt="" src="../img/01.png"></p>
+<ul>
+<li>
+<p>The entity is essentially a disk, as we have displayed all of the vertices on the z axis origin.</p>
+</li>
+<li>
+<p>Change the call to place the centre of the circle on positive z 75:</p>
+</li>
+</ul>
+<pre><code>  drawCone(0,0,75, 50);
+</code></pre>
+
+<ul>
+<li>Rotating now using the arrow keys should being the cone into perspective:</li>
+</ul>
+<p><img alt="" src="../img/02.png"></p>
+<ul>
+<li>Experiment with other z values, + other rotations.</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Colour</h2>
+<ul>
+<li>
+<p>We would like to make every second triangle in the cone red or green.</p>
+</li>
+<li>
+<p>Introduce a flag into the drawCone method:</p>
+</li>
+</ul>
+<pre><code>  int step = 0;
+</code></pre>
+
+<ul>
+<li>Inside the loop rendering the triangles, change the colour based on the value of step variable:</li>
+</ul>
+<pre><code>    glColor3f(step % 2 == 0, step % 2, 0.0f);
+    step++;
+</code></pre>
+
+<ul>
+<li>Cone should render like this:</li>
+</ul>
+<p><img alt="" src="../img/03.png"></p>
+<ul>
+<li>We are still displaying polygons in GL_LINE mode, change this to fill:</li>
+</ul>
+<pre><code>  glPolygonMode(GL_FRONT,GL_FILL);
+  glPolygonMode(GL_BACK,GL_FILL);
+</code></pre>
+
+<ul>
+<li>Build and test:</li>
+</ul>
+<p><img alt="" src="../img/04.png"></p>
+<ul>
+<li>
+<p>The default shade model is GL_SMOOTH, which causes colours to be interpolated at the edges, as documented here:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glShadeModel.xml">glShadeModel</a></p>
+</li>
+<li>
+<p>Switch to GL_FLAT:</p>
+</li>
+</ul>
+<pre><code>  glShadeModel(GL_FLAT);
+</code></pre>
+
+<ul>
+<li>and view the results:</li>
+</ul>
+<p><img alt="" src="../img/05.png"></p>
+<ul>
+<li>To simplify further experiments, we will place a circle at the base of the cone to "close" it:</li>
+</ul>
+<pre><code>  drawCone(0,0,0, 50);
+</code></pre>
+
+<ul>
+<li>Build and test, including viewing the cone from all angles</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Depth Testing</h2>
+<ul>
+<li>
+<p>Rotating the cone produces some odd results. It seems that the cone is transparent, as the lines of the triangles seem to flow into one another. </p>
+</li>
+<li>
+<p>This is because we are seeing "inside" the cone, and its opposing edges are competing for our visual attention.</p>
+</li>
+<li>
+<p>We can eliminate the confusion by turning on depth testing:</p>
+</li>
+</ul>
+<pre><code>  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+</code></pre>
+
+<ul>
+<li>See <a href="http://www.opengl.org/documentation/specs/glut/spec3/node12.html">glutinitDislayMode</a></li>
+</ul>
+<pre><code>  glEnable(GL_DEPTH_TEST);
+</code></pre>
+
+<ul>
+<li>
+<p>See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glEnable.xml">glEnable</a></p>
+</li>
+<li>
+<p>Try this, build and test. Its appesrence will still be misleading. We need one additional step, when clearing the screen, we need also to clear the depth bit:</p>
+</li>
+</ul>
+<pre><code>  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+</code></pre>
+
+<ul>
+<li>Build and test. Contrast with the version that did not include depth testing.</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: Culling</h2>
+<ul>
+<li>
+<p>An alternative to depth testing, but usually employed accompanying it, is culling.</p>
+</li>
+<li>
+<p>Culling distinguishes between "front" and "rear" facing surfaces, and completely removes rear surfaces from view.</p>
+</li>
+<li>
+<p>To see its effects, remove the Depth testing code just introduced in the last step.</p>
+</li>
+</ul>
+<pre><code>  //glEnable(GL_DEPTH_TEST);
+</code></pre>
+
+<ul>
+<li>
+<p>Verify that the "confused" cone is on display.</p>
+</li>
+<li>
+<p>Turn on culling:</p>
+</li>
+</ul>
+<pre><code>  glEnable(GL_CULL_FACE);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Surprisingly, nothing will appear - unless you complete a 180 turn of the cone. This is caused by a problem with the 'winding". Opengl needs to know which surfaces are "front" and which are "rear". It relies on winding to do this.</p>
+</li>
+<li>
+<p>However, our code as two different windings for the circle and cone. We can change this default using</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glFrontFace.xml">glFrontFace</a></p>
+</li>
+<li>
+<p>We need to change the front face to counter clockwise for the cone, and clockwise for the base:</p>
+</li>
+</ul>
+<pre><code>  glFrontFace(GL_CW);
+  drawCone(0,0,75, 50);
+  glFrontFace(GL_CCW);
+  drawCone(0,0,0, 50);
+</code></pre>
+
+<ul>
+<li>The cone should now render as expected.</li>
+</ul>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Exercises</h2>
+<h2>1. Four Cones</h2>
+<ul>
+<li>
+<p>Set the window size to be larger than the current default.</p>
+</li>
+<li>
+<p>Divide the screen into 4 quadrants with simple dashed (stippled) lines</p>
+</li>
+<li>
+<p>Draw a cone in each quadrant</p>
+</li>
+</ul>
+<h2>2. Animated Cones</h2>
+<ul>
+<li>Using the simple animation techniques cover in lab03, have each of the cones rotating. </li>
+</ul>
+<h2>3. Coloured Cones</h2>
+<ul>
+<li>
+<p>Change the colour scheme for each of the cones. Have some of then using interpolated colours, others using flat. </p>
+</li>
+<li>
+<p>Also, have some of them using different colours.</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

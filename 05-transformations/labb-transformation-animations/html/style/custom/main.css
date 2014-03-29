@@ -1,0 +1,77 @@
+body 
+{
+  font-family: "Open Sans", "Helvetica", "Helvetica Neue",  "Arial", sans-serif;
+  font-size: 14px
+}
+
+code
+{
+	font-family: "Monaco";
+	font-size: 110%;
+}
+
+h1 
+{
+  font-style:italic;
+  font-size:120%;
+  border-bottom: thin solid DarkBlue;
+}
+h2 
+{
+  font-size:110%;
+  border-bottom: thin solid DarkBlue;
+}
+h3 
+{
+  font-size:100%;
+  border-bottom: thin solid DarkBlue;
+}
+
+#footertext 
+{
+  font-size:70%
+}
+
+
+#title 
+{
+  font-size:120%;
+  color: black;
+  text-align: right;
+  background-color : white;
+}
+
+img 
+{
+   padding:1px;
+   border:1px solid DarkBlue;
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
+header img
+{
+	 padding:1px;
+   border:0px solid DarkBlue;
+}
+
+header h1
+{
+  font-style:normal;
+  font-size:120%;
+  border-bottom: 0px;
+}
+
+header h2
+{
+  font-style:normal;
+  font-size:100%;
+  border-bottom: 0px;
+}
+
+header h3
+{
+  font-style:normal;
+  font-size:90%;
+  border-bottom: 0px;
+}
