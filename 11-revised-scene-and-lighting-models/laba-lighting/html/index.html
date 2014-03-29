@@ -1,0 +1,745 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Scenes, Lighting & Modeling </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Scenes, Lighting & Modeling</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Grid </a>
+          <a class="item" data-tab="step03"> Scene </a>
+          <a class="item" data-tab="step04"> AnimateScene </a>
+          <a class="item" data-tab="step05"> Materials </a>
+          <a class="item" data-tab="step06"> Light </a>
+          <a class="item" data-tab="step07"> LightingModel </a>
+          <a class="item" data-tab="step08"> World </a>
+          <a class="item" data-tab="step09"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Factor out physics related features from Scene into a new AnimateScene class</p>
+</li>
+<li>
+<p>Rework the lighting experiments into a coherent object model, incorporating:</p>
+</li>
+<li>
+<p>LightSetting</p>
+</li>
+<li>
+<p>AmbientLight</p>
+</li>
+<li>
+<p>SpotLight</p>
+</li>
+<li>
+<p>Encapsulate these into a LightingModel class</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>00: Grid</h2>
+<ul>
+<li>Repackage the grid introduced in the last lab as an actor:</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;actor.h&quot;
+
+struct Grid: public Actor
+{
+  Grid()
+  {}
+
+  void render()
+  {
+    const float RANGE = 15.0f;
+    glLineWidth(5);
+    glColor3f(0.0,1.0,0.0);
+    glBegin(GL_LINES);
+    for(int i=-5; i&lt;=5; ++i) {
+      float offset = 0.2*float(i)*RANGE;
+      glVertex3f(-RANGE, 0, offset);
+      glVertex3f( RANGE, 0, offset);
+      glVertex3f( offset, 0,-RANGE);
+      glVertex3f( offset, 0, RANGE);
+    }
+    glEnd();
+    glLineWidth(1);
+  }
+};
+</code></pre>
+
+<ul>
+<li>Remove the hard coded grid from the scene class, and add a grid object created in the contr</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>01: Scene</h2>
+<ul>
+<li>Scene can be refactored to remove physics related aspects (to a new subclass), and thus considerably simplified:</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;libs.h&quot;
+#include &quot;model.h&quot;
+#include &quot;actor.h&quot;
+
+struct Scene
+{
+  Scene();
+  void loadActors(Model*);
+
+  virtual Actor* loadActor(GeometryMap::value_type &amp;amp;value);
+  virtual void render();
+  virtual void tick(float secondsDelta) {}
+
+  ActorMap         actors;
+};
+</code></pre>
+
+<ul>
+<li>In the implementation we load the actors as a separate phase, calling a virtual function to load individual actors:</li>
+</ul>
+<pre><code>#include &quot;scene.h&quot;
+#include &quot;colourcube.h&quot;
+#include &quot;jetplane.h&quot;
+#include &quot;grid.h&quot;
+
+using namespace std;
+
+Scene:: Scene()
+{
+}
+
+void Scene::loadActors(Model*model)
+{
+  string actorName;
+  foreach (GeometryMap::value_type &amp;amp;value, model-&gt;entities)
+  {
+    Actor* actor = loadActor(value);
+    if (actor)
+    {
+      actorName = value.first;
+      actors.insert(actorName, actor);
+    }
+  }
+  actorName = &quot;grid&quot;;
+  actors.insert (actorName, new Grid());
+}
+
+Actor* Scene::loadActor(GeometryMap::value_type &amp;amp;value)
+{
+  return new Actor(&amp;amp;value.second);
+}
+
+void Scene::render()
+{
+  foreach (ActorMap::value_type value, actors)
+  {
+    value-&gt;second-&gt;render();
+  }
+}
+</code></pre>
+
+<ul>
+<li>In main we need to create the scene, and then load it explicitly:</li>
+</ul>
+<pre><code>  Scene *scene = new Scene ();
+  scene-&gt;loadActors(model);
+  theWorld.scene = scene;
+</code></pre>
+
+<ul>
+<li>
+<p>This adjustment will enable us to load a scene with actors loaded from multiple model files.</p>
+</li>
+<li>
+<p>Build and test this now.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>02: AnimateScene</h2>
+<ul>
+<li>All of the physics aspects can now be incorporated into a derived class "AnimateScene":</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;libs.h&quot;
+#include &quot;scene.h&quot;
+#include &quot;animateactor.h&quot;
+#include &quot;forcegeneratorregistry.h&quot;
+
+struct AnimateScene : public Scene
+{
+  AnimateScene();
+  Actor* loadActor(GeometryMap::value_type &amp;amp;value);
+
+  void tick(float secondsDelta);
+
+  AnimateActorMap        animateActors;
+  ForceGeneratorRegistry forceGeneratorRegistry;
+};
+</code></pre>
+
+<ul>
+<li>In the implementation, we are looking out for objects of specific names to 'animate'</li>
+</ul>
+<pre><code>#include &quot;animatescene.h&quot;
+#include &quot;sphereactor.h&quot;
+
+using namespace std;
+
+AnimateScene :: AnimateScene()
+{
+}
+
+Actor* AnimateScene::loadActor(GeometryMap::value_type &amp;amp;value)
+{
+  Actor *actor = 0;
+  if (value.first == &quot;pSphere1&quot;)
+  {
+    PhysicsActor * sphere = new SphereActor(&amp;amp;value.second);
+    actor = dynamic_cast&lt;Actor*&gt; (sphere);
+    // create an anchor
+    Vector3 anchor = sphere-&gt;position + Vector3(0,5,0);
+    // create force generator
+    AnchoredSpringForceGenerator * fg =
+    new AnchoredSpringForceGenerator(anchor, 1.0, 3.0);
+    // add actor&lt;-&gt;forceGenerator pair to registry
+    forceGeneratorRegistry.add(sphere, fg);
+  }
+  else if (value.first == &quot;pSphere2&quot; || value.first == &quot;pSphere3&quot;)
+  {
+    actor = new SphereActor(&amp;amp;value.second);
+  }
+  else
+  {
+    return Scene::loadActor(value);
+  }
+  if (actor)
+  {
+    animateActors[value.first] = (AnimateActor*) actor;
+  }
+  return actor;
+}
+
+void AnimateScene::tick(float secondsDelta)
+{
+  forceGeneratorRegistry.applyForce(secondsDelta);
+
+  foreach (AnimateActorMap::value_type value, animateActors)
+  {
+    value.second-&gt;integrate(secondsDelta);
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>and leaving all other objects to the base loadActors method to create.</p>
+</li>
+<li>
+<p>We also override the tick method</p>
+</li>
+<li>
+<p>Back in main, we can just create an animated scene:</p>
+</li>
+</ul>
+<pre><code>  Scene *scene = new AnimateScene ();
+</code></pre>
+
+<ul>
+<li>
+<p>and we are 'live' again with the physics simulation</p>
+</li>
+<li>
+<p>Build and test. Note how we have a static cube object, and three animated spheres.</p>
+</li>
+<li>
+<p>If you revert to:</p>
+</li>
+</ul>
+<pre><code>  Scene *scene = new Scene ();
+</code></pre>
+
+<ul>
+<li>then the scene renders, is navigable, not not animated.</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>03: Materials</h2>
+<ul>
+<li>
+<p>Currently materials are mixed in with light functions in lights.h/cpp. These should be refactored into their own files, and moved into the 'scene' package.</p>
+</li>
+<li>
+<p>This is the header for a new file 'materials.h'</p>
+</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;libs.h&quot;
+
+enum MaterialTypes {flatRed, flatYellow, flatBlue, flatGreen, flatGray, plasticRed, shinyWhite, brass, bronze,
+  chrome, copper, gold, pewter, silver, polishSilver, plasticBlack} ;
+
+void applyMaterial(MaterialTypes material);
+</code></pre>
+
+<ul>
+<li>and this is the implementation:</li>
+</ul>
+<pre><code>#include &quot;libs.h&quot;
+#include &quot;materials.h&quot;
+
+struct Material
+{
+  GLfloat ambient[4];
+  GLfloat diffuse[4];
+  GLfloat specular[4];
+  GLfloat shiny;
+};
+
+Material materials [] =
+{
+    { {0.8, 0.0, 0.0, 1.0}, // flatRed
+      {0.8, 0.0, 0.0, 1.0},
+      {0.8, 0.0, 0.0, 1.0}, 25.0 },
+
+    { {0.8, 0.0, 0.0, 1.0}, //flatYellow
+      {0.8, 0.0, 0.0, 1.0},
+      {0.8, 0.0, 0.0, 1.0}, 25.0 },
+
+    { {0.0, 0.0, 0.8, 1.0}, // flatblue
+      {0.0, 0.0, 0.8, 1.0},
+      {0.0, 0.0, 0.8, 1.0}, 25.0 },
+
+    { {0.0, 0.8, 0.0, 1.0}, // flatgreen
+      {0.0, 0.8, 0.0, 1.0},
+      {0.0, 0.8, 0.0, 1.0}, 25.0 },
+
+    { {0.5, 0.5, 0.5, 1.0}, // flatgrey
+      {0.5, 0.5, 0.5, 1.0},
+      {0.5, 0.5, 0.5, 1.0}, 25.0 },
+
+    { {0.3, 0.0, 0.0, 1.0}, //plasticRed
+      {0.6, 0.0, 0.0, 1.0},
+      {0.8, 0.6, 0.6, 1.0}, 32.0 },
+
+    { {1.0, 1.0, 1.0, 1.0}, //shinyWhite
+      {1.0, 1.0, 1.01, 1.0},
+      {1.0, 1.0, 1.0, 1.0}, 100.0 },
+
+    { {0.329412, 0.223529, 0.027451, 1.0}, //brass
+      {0.780392, 0.568627, 0.113725, 1.0},
+      {0.9922157, 0.941176, 0.807843, 1.0}, 27.8974 },
+
+    { {0.2125, 0.1275, 0.054, 1.0}, //bronze
+      {0.714, 0.4284, 0.18144, 1.0},
+      {0.303548, 0.271906, 0.106721, 1.0}, 25.6 },
+
+    { {0.25, 0.25, 0.25, 1.0}, //chrome
+      {0.4, 0.4, 0.4, 1.0},
+      {0.774597, 0.774597, 0.774597, 1.0}, 76.8 },
+
+    { {0.19125, 0.0735, 0.0225, 1.0}, //copper
+      {0.7038, 0.27048, 0.0828, 1.0},
+      {0.256777, 0.137622, 0.086014, 1.0},  12.8 },
+
+    { {0.24725, 0.1995, 0.0745, 1.0},// gold
+      {0.75164, 0.60648, 0.22658, 1.0},
+      {0.628281, 0.555802, 0.366065, 1.0},  51.2 },
+
+    { {0.10558, 0.058824, 0.113725, 1.0}, //pewter
+      {0.427451, 0.470588, 0.541176, 1.0},
+      {0.3333, 0.3333, 0.521569, 1.0}, 9.84615 },
+
+    { {0.19225, 0.19225, 0.19225, 1.0}, //silver
+      {0.50754, 0.50754, 0.50754, 1.0},
+      {0.508273, 0.508273, 0.508273, 1.0}, 51.2 },
+
+    { {0.23125, 0.23125, 0.23125, 1.0}, //polishSilver
+      {0.2775, 0.2775, 0.2775, 1.0},
+      {0.773911, 0.773911, 0.773911, 1.0}, 89.6 },
+
+    { {0.0, 0.0, 0.0, 1.0}, //plasticBlack
+      {0.01, 0.01, 0.01, 1.0},
+      {0.50, 0.50, 0.50, 1.0},32.0 }
+};
+
+
+void applyMaterial(MaterialTypes material)
+{
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   materials[material].ambient);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   materials[material].diffuse);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  materials[material].specular);
+  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, materials[material].shiny);
+}
+</code></pre>
+
+<ul>
+<li>Change jetplane to include this instead of 'lights.h'. Again, make sure this file is in the scene package.</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>04: Light</h2>
+<ul>
+<li>
+<p>Delete 'lights.h' and 'lights.cpp' from world. We will be replacing them with encapsulated versions.</p>
+</li>
+<li>
+<p>First, in 'light.h' introduced these abstractions:</p>
+</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;libs.h&quot;
+#include &quot;vector3.h&quot;
+
+struct LightSetting
+{
+  float*  components;
+  int     type;
+};
+
+struct lttype
+{
+  bool operator() (const LightSetting&amp;amp; s1, const LightSetting&amp;amp; s2) const
+  {
+    return (s1.type &lt; s2.type);
+  }
+};
+
+struct AmbientLight
+{
+  enum AmbientLightSetting {fullLight, halfLight, defaultLight};
+
+  AmbientLight(AmbientLightSetting setting);
+  void switchOn();
+
+  AmbientLightSetting setting;
+};
+
+struct SpotLight
+{
+  SpotLight (GLenum id, Vector3 p);
+  void augment(LightSetting &amp;amp;setting);
+
+  void switchOn();
+  void reposition();
+
+  GLenum  id;
+  Vector3 position;
+  std::set&lt;LightSetting, lttype&gt; lightSettings;
+};
+
+struct ltspotlight
+{
+  bool operator() (const SpotLight&amp;amp; s1, const SpotLight&amp;amp; s2) const
+  {
+    return (s1.id &lt; s2.id);
+  }
+};
+typedef std::set&lt;SpotLight, ltspotlight&gt; SpotLightSet;
+</code></pre>
+
+<ul>
+<li>
+<p>These encapsulate basic light settings, classes for ambient light and spotlights + support classes or sets of these.</p>
+</li>
+<li>
+<p>This is the implementation:</p>
+</li>
+</ul>
+<pre><code>#include &quot;light.h&quot;
+
+float settingTable[][4] =
+{
+  { 1.0f, 1.0f, 1.0f, 1.0f }, // full
+  { 0.5f, 0.5f, 0.5f, 1.0f }, // half
+  { 0.2f, 0.2f, 0.2f, 1.0f }  // default
+};
+
+AmbientLight::AmbientLight(AmbientLightSetting setting)
+: setting(setting)
+{
+}
+
+void AmbientLight::switchOn()
+{
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, settingTable[setting]);
+}
+
+SpotLight::SpotLight (GLenum id, Vector3 p)
+: id(id), position(p)
+{
+}
+
+void SpotLight::augment(LightSetting &amp;amp;setting)
+{
+  lightSettings.insert(setting);
+}
+
+void SpotLight::switchOn()
+{
+  foreach (LightSetting setting, lightSettings)
+  {
+    glLightfv(id, setting.type, setting.components);
+  }
+  glEnable(id);
+}
+
+void SpotLight::reposition()
+{
+  float pos[4];
+  pos[0] = position.X;
+  pos[1] = position.Y;
+  pos[2] = position.Z;
+  pos[3] = 1;
+
+  glLightfv(id, GL_POSITION, pos);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Note the key features - light can be declared, their characteristics set, switched on and, for spotlights, positioned.</p>
+</li>
+<li>
+<p>These classes should build successfully. To use them, we with introduce a 'LightingModel'</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>05: LightingModel</h2>
+<ul>
+<li>The lighting model encapsultes all the lights created by the world.</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;libs.h&quot;
+#include &quot;light.h&quot;
+
+struct LightingModel
+{
+  LightingModel();
+  void switchOnLights();
+  void positionLights();
+
+  SpotLightSet spotLights;
+  AmbientLight ambientLight;
+};
+</code></pre>
+
+<ul>
+<li>It consists of an ambient light + a set of spot lights. This is the implementation:</li>
+</ul>
+<pre><code>#include &quot;lightingmodel.h&quot;
+
+float  ambientLightModerate[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+float  diffuseLightModerate[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+
+LightingModel::LightingModel()
+: ambientLight(AmbientLight::fullLight)
+{
+  SpotLight spotLight0 ((GLenum)GL_LIGHT0, Vector3(-50, 50, 0));
+
+  LightSetting setting1 = {ambientLightModerate, GL_AMBIENT};
+  LightSetting setting2 = {diffuseLightModerate, GL_DIFFUSE};
+
+  spotLight0.augment(setting1);
+  spotLight0.augment(setting2);
+
+  spotLights.insert(spotLight0);
+}
+
+void LightingModel::switchOnLights()
+{
+  ambientLight.switchOn();
+  foreach (SpotLight spotLight, spotLights)
+  {
+    spotLight.switchOn();
+  }
+  glEnable(GL_NORMALIZE);
+}
+
+void LightingModel::positionLights()
+{
+  foreach (SpotLight spotLight, spotLights)
+  {
+    spotLight.reposition();
+  }
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step08" class="ui tab stacked clarity-book segment">
+	     <h2>06: World</h2>
+<ul>
+<li>In world, introduce a a light model member:</li>
+</ul>
+<pre><code>  LightingModel  lightingModel;
+</code></pre>
+
+<ul>
+<li>The World::initialize method can be simplified:</li>
+</ul>
+<pre><code>void World::initialize(string name, int width, int height)
+{
+  int argc=0;
+  char** argv;
+  glutInit(&amp;amp;argc, argv);
+
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitWindowSize(width, height);
+  glutCreateWindow(name.c_str());
+
+  Color::Black.renderClear();
+  glEnable(GL_DEPTH_TEST);
+  glFrontFace(GL_CCW);
+  glPolygonMode(GL_FRONT,GL_LINE);
+  glPolygonMode(GL_BACK,GL_LINE);
+
+  glutKeyboardFunc(keyboard);
+  glutReshapeFunc(reshape);
+  glutDisplayFunc(renderScene);
+  glutSpecialFunc(keyboardSpecial);
+  glutPassiveMotionFunc(::mouseMovement);
+
+  glEnable(GL_LIGHTING);
+  lightingModel.switchOnLights();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Note we have removed some duplication residue (left over from projection initialisation). </p>
+</li>
+<li>
+<p>In the last line, we 'switch on' the lights.</p>
+</li>
+<li>
+<p>Finally, we make sure to position the lights in our scene:</p>
+</li>
+</ul>
+<pre><code>void World::render()
+{
+  Color::Blue.renderClear();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  if (projectors.isPerspective())
+  {
+    glLoadIdentity();
+    cameras.currentCamera-&gt;render();
+  }
+  lightingModel.positionLights();
+
+  scene-&gt;render();
+
+  glutSwapBuffers();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>You may need to re-introduce the jet plane in scene to verify that lights are operating as expected:</p>
+</li>
+</ul>
+<pre><code>void Scene::loadActors(Model*model)
+{
+  //....
+  actorName = &quot;jet&quot;;
+  actors.insert (actorName, new JetPlane());
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step09" class="ui tab stacked clarity-book segment">
+	     <h2>07: Exercises</h2>
+<h2>Solution:</h2>
+<ul>
+<li>
+<p>This is the complete project to date:</p>
+</li>
+<li>
+<p><a href="../archives/lab11_lighting.zip">lab11_lighting.zip</a></p>
+</li>
+</ul>
+<h2>Externalise Light Settings</h2>
+<ul>
+<li>
+<p>The lighting settings should ideally be extenalised to a resource file.</p>
+</li>
+<li>
+<p>This could contain ambient light settings, and then specifications for each spot light.</p>
+</li>
+<li>
+<p>LightModel would then load this and render it into the scene.</p>
+</li>
+<li>
+<p>For this type of information, the Yaml file format is useful format:</p>
+</li>
+<li>
+<p>http://yaml.org/</p>
+</li>
+<li>
+<p>http://en.wikipedia.org/wiki/YAML</p>
+</li>
+<li>
+<p>There are many parsers available. This one looks reasonably active, and includes a cross-platform version:</p>
+</li>
+<li>
+<p>http://code.google.com/p/yaml-cpp/</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

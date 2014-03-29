@@ -1,0 +1,342 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Lighting & Materials </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Lighting & Materials</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Geometry </a>
+          <a class="item" data-tab="step04"> Face </a>
+          <a class="item" data-tab="step05"> utils </a>
+          <a class="item" data-tab="step06"> physics </a>
+          <a class="item" data-tab="step07"> Scene + Model </a>
+          <a class="item" data-tab="step08"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>Incorporate force generators into the physics model</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Create a new project called lab10_physics, it should be a clone of lab10_lighting project. You can use this one here if you didnt complete it:</p>
+</li>
+<li>
+<p><a href="../archives/lab10_lighting.zip">lab10_lighting.zip</a></p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Geometry</h2>
+<ul>
+<li>Currently Geometry retains a reference to the special 'group' object, extracted from the OBJ file:</li>
+</ul>
+<pre><code>struct Geometry : public Renderable
+{
+ //...
+  VertexGroup *vertexGroup;
+  std::vector&lt;Vector3&gt; vertices;
+  //...
+};
+</code></pre>
+
+<ul>
+<li>This currently holds a reference to this vertex group. We would like to have our own copy of these vertices - available exclusively to the geometry object under construction. To provide for this, declare a new vector alongside the vertexGroup:</li>
+</ul>
+<pre><code>struct Geometry : public Renderable
+{
+ //...
+  VertexGroup *vertexGroup;
+  std::vector&lt;Vector3&gt; vertices;
+  //...
+  void extractVertices();
+};
+</code></pre>
+
+<ul>
+<li>
+<p>Also introduce a method to extract the vertices from the group and populate the 'vertices' object (shown above).</p>
+</li>
+<li>
+<p>This is the implementation of extractVertices here:</p>
+</li>
+</ul>
+<pre><code>void Geometry::extractVertices()
+{
+  int newIndex=0;
+  foreach (Face &amp;amp;face, faces)
+  {
+    vector&lt;int&gt; groupIndices = face.vertexIndices;
+    face.vertexIndices.clear();
+    foreach (int index, groupIndices)
+    {
+      Vector3 vertex(vertexGroup-&gt;vertices[index-1].X, vertexGroup-&gt;vertices[index-1].Y, vertexGroup-&gt;vertices[index-1].Z);
+      vertices.push_back(vertex);
+      face.vertexIndices.push_back(newIndex);
+      newIndex++;
+    }
+  }
+</code></pre>
+
+<ul>
+<li>
+<p>Have a close look at this code - essentially it is just replicating that part of the vertexGroup the is used by this Geometry object, and holding it as part of this object.</p>
+</li>
+<li>
+<p>We can call this then from the Geometry constructor:</p>
+</li>
+</ul>
+<pre><code>Geometry::Geometry(string groupName, istream&amp;amp; is, VertexGroup*group)
+: name(groupName), vertexGroup(group)
+{
+  //...
+  extractVertices();
+}
+</code></pre>
+
+<ul>
+<li>We can now also change Geometry::render() to use this vector instead of the vertexGroup:</li>
+</ul>
+<pre><code>void Geometry::render()
+{
+  foreach (Face &amp;amp;face, faces)
+  {
+    face.render(vertices);
+  }
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Face</h2>
+<ul>
+<li>Finally, we need to fix an anomaly in face. Currently it looks like this:</li>
+</ul>
+<pre><code>void Face::render(std::vector &lt;Vector3&gt;&amp;amp;vertexTable)
+{
+  vertexIndices.size() == 3?
+     glBegin(GL_TRIANGLES)
+    :glBegin(GL_QUADS);
+
+  foreach (int index, vertexIndices)
+  {
+    glVertex3f( vertexTable[index-1].X,
+                vertexTable[index-1].Y,
+                vertexTable[index-1].Z );
+  }
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Note that we have to subtract 1 form the index values, as the Waverfront indices are 1 based.</p>
+</li>
+<li>
+<p>We change remove this substraction:</p>
+</li>
+</ul>
+<pre><code>void Face::render(std::vector &lt;Vector3&gt;&amp;amp;vertexTable)
+{
+  vertexIndices.size() == 3?
+     glBegin(GL_TRIANGLES)
+    :glBegin(GL_QUADS);
+
+  foreach (int index, vertexIndices)
+  {
+    glVertex3f( vertexTable[index].X,
+                vertexTable[index].Y,
+                vertexTable[index].Z );
+  }
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>Build and test.</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: utils</h2>
+<ul>
+<li>
+<p>To complete this phase of the physics support - we need to replace a number of classes in the utils folder with these versions:</p>
+</li>
+<li>
+<p><a href="../archives/vector3.h">vector3.h</a></p>
+</li>
+<li>
+<p><a href="../archives/vector3.cpp">vector3.cpp</a></p>
+</li>
+<li>
+<p>and also introduce these new classes:</p>
+</li>
+<li>
+<p><a href="../archives/vector4.h">vector4.h</a></p>
+</li>
+<li>
+<p><a href="../archives/vector4.cpp">vector4.cpp</a></p>
+</li>
+<li>
+<p><a href="../archives/matrix3.h">matrix3.h</a></p>
+</li>
+<li>
+<p><a href="../archives/matrix3.cpp">matrix3.cpp</a></p>
+</li>
+<li>
+<p><a href="../archives/matrix4.h">matrix4.h</a></p>
+</li>
+<li>
+<p><a href="../archives/matrix4.cpp">matrix4.cpp</a></p>
+</li>
+<li>
+<p><a href="../archives/quat.h">quat.h</a></p>
+</li>
+<li>
+<p><a href="../archives/quat.cpp">quat.cpp</a></p>
+</li>
+<li>
+<p>Build and test</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: physics</h2>
+<ul>
+<li>
+<p>Replace these classes with the following:</p>
+</li>
+<li>
+<p><a href="../archives/physicsactor.h">physicsactor.h</a></p>
+</li>
+<li>
+<p><a href="../archives/physicsactor.cpp">physicsactor.cpp</a></p>
+</li>
+<li>
+<p><a href="../archives/cubeactor.h">cubeactor.h</a></p>
+</li>
+<li>
+<p><a href="../archives/cubeactor.cpp">cubeactor.cpp</a></p>
+</li>
+<li>
+<p>And introduce these:</p>
+</li>
+<li>
+<p><a href="../archives/sphereactor.h">sphereactor.h</a></p>
+</li>
+<li>
+<p><a href="../archives/sphereactor.cpp">sphereactor.cpp</a></p>
+</li>
+<li>
+<p><a href="../archives/forcegenerators.h">forcegenerators.h</a></p>
+</li>
+<li>
+<p><a href="../archives/forcegenerators.cpp">forcegenerators.cpp</a></p>
+</li>
+<li>
+<p><a href="../archives/forcegeneratorregistry.h">forcegeneratorregistry.h</a></p>
+</li>
+<li>
+<p><a href="../archives/forcegeneratorregistry.cpp">forcegeneratorregistry.cpp</a></p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Scene + Model</h2>
+<ul>
+<li>
+<p>This is a revised version of the scene implementation:</p>
+</li>
+<li>
+<p><a href="../archives/scene.h">scene.h</a></p>
+</li>
+<li>
+<p><a href="../archives/scene.cpp">scene.cpp</a></p>
+</li>
+<li>
+<p>Build and test this - and load the following model:</p>
+</li>
+<li>
+<p><a href="../archives/physicsmodel.obj">physicsmodel.obj</a></p>
+</li>
+<li>
+<p>Which is created from this may file here:</p>
+</li>
+<li>
+<p><a href="../archives/physicsmodel.mb">physicsmodel.mb</a></p>
+</li>
+<li>
+<p>This is a complete archive of the project in case you have any difficulties</p>
+</li>
+<li>
+<p><a href="../archives/lab10_physics.zip">lab10_physics.zip</a></p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step08" class="ui tab stacked clarity-book segment">
+	     <h2>07: Exercises</h2>
+<h2>Exercise 1</h2>
+<ul>
+<li>The grid - currently hard coded into the scene - should really be another custom actor. Write this actor, and have it displayed/hidden based on some keystroke</li>
+</ul>
+<h2>Exercise 2</h2>
+<ul>
+<li>The physics properties for the spheres are hard coded. Move them to a separate simulation data file</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

@@ -1,0 +1,512 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Camera, Colour, Custom Actors </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Camera, Colour, Custom Actors</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> World </a>
+          <a class="item" data-tab="step04"> Camera </a>
+          <a class="item" data-tab="step05"> Cube </a>
+          <a class="item" data-tab="step06"> ColourCube </a>
+          <a class="item" data-tab="step07"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Rework the Camera class to utilise the mouse + arrow keys</p>
+</li>
+<li>
+<p>Create a custom actor class - which override the default behaviour in interesting ways</p>
+</li>
+<li>
+<p>Create (as an exercise) a custom actor class whose geometry is completely loaded external to the default model</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Your completed lab from last session should be used as the basis for this lab. Clone the project and call in lab09_camera_colour.</p>
+</li>
+<li>
+<p>Alternatively, you can import the source from this archive here:</p>
+</li>
+<li>
+<p><a href="../archives/lab08complete.zip">lab08complete.zip</a></p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: World</h2>
+<ul>
+<li>
+<p>The camera - although functional - is difficulty to use. We would like to incorporate the mouse into its controls.</p>
+</li>
+<li>
+<p>To do this, we need to refactor the glutadapter, World and Camera classes:</p>
+</li>
+<li>
+<p>First, glutadapter.h - introduce two new functions:</p>
+</li>
+</ul>
+<pre><code>void keyboardSpecial(int key, int x, int y);
+void mouseMovement(int x, int y);
+</code></pre>
+
+<ul>
+<li>
+<p>These are callback function, which will be registered using these glut functions:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/resources/libraries/glut/spec3/node54.html#SECTION00089000000000000000">glutSpecialFuncl</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/resources/libraries/glut/spec3/node51.html#SECTION00086000000000000000">glutPassiveMotionFunc</a></p>
+</li>
+<li>
+<p>Their implementations will pass on the calls to the World:</p>
+</li>
+</ul>
+<pre><code>void mouseMovement(int x, int y)
+{
+  theWorld.mouseMovement(x,y);
+}
+
+void keyboardSpecial(int key, int x, int y)
+{
+  theWorld.specialKeyPress(key, x, y);
+}
+</code></pre>
+
+<ul>
+<li>In the World class - we prototype these methods:</li>
+</ul>
+<pre><code>  void specialKeyPress(int key, int x, int y);
+  void mouseMovement(int x, int y);
+</code></pre>
+
+<ul>
+<li>... and provide an initial implementation:</li>
+</ul>
+<pre><code>void World::specialKeyPress(int key, int x, int y)
+{
+  //...
+}
+
+void World::mouseMovement(int x, int y)
+{
+  //...
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Camera</h2>
+<ul>
+<li>We now refactor the Camera to take advantage of this new input capability. Relace the current definition with the following:</li>
+</ul>
+<pre><code>struct Camera
+{
+  Camera();
+
+  void specialKeyboard (int key, int x, int y);
+  void mouseMovement(int x, int y);
+  void render();
+
+  Vector3 position;
+  float xrot, yrot, cRadius, lastx, lasty;
+};
+</code></pre>
+
+<ul>
+<li>... and this implementation:</li>
+</ul>
+<pre><code>Camera::Camera()
+: position(0,0,0), xrot(0), yrot(0), cRadius(5)
+{
+}
+
+void Camera::render()
+{
+  glTranslatef(0.0f, 0.0f, -cRadius);
+  Vector3::UnitX.rotate(xrot);
+  Vector3::UnitY.rotate(yrot);
+  glTranslated(-position.X, 0.0f, -position.Z);
+}
+
+void Camera::specialKeyboard(int key, int x, int y)
+{
+  float xrotrad, yrotrad;
+  switch (key)
+  {
+    case 101: yrotrad = (yrot / 180 * GL_PI);
+              xrotrad = (xrot / 180 * GL_PI);
+              position.X += float(sin(yrotrad));
+              position.Z -= float(cos(yrotrad));
+              position.Y -= float(sin(xrotrad));
+              break;
+
+    case 103: yrotrad = (yrot / 180 * GL_PI);
+              xrotrad = (xrot / 180 * GL_PI);
+              position.X -= float(sin(yrotrad));
+              position.Z += float(cos(yrotrad));
+              position.Y += float(sin(xrotrad));
+              break;
+
+    case 102: yrotrad = (yrot / 180 * GL_PI);
+              position.X += float(cos(yrotrad)) * 0.2;
+              position.Z += float(sin(yrotrad)) * 0.2;
+              break;
+
+    case 100: yrotrad = (yrot / 180 * GL_PI);
+              position.X -= float(cos(yrotrad)) * 0.2;
+              position.Z -= float(sin(yrotrad)) * 0.2;
+              break;
+  }
+}
+
+void Camera::mouseMovement(int x, int y)
+{
+  int diffx = x - lastx;
+  int diffy = y - lasty;
+  lastx = x;
+  lasty = y;
+  xrot += (float) diffy;
+  yrot += (float) diffx;
+}
+</code></pre>
+
+<ul>
+<li>In World, we will change how input event events are passed on to the camera object. First, remove completely the call to camera::render from keyPress:</li>
+</ul>
+<pre><code>void World::keyPress(unsigned char ch)
+{
+  if (ch &gt;= '1' &amp;amp;&amp;amp; ch &lt;= '4')
+  {
+    projectors.keyPress(ch);
+  }
+  glutPostRedisplay();
+}
+</code></pre>
+
+<ul>
+<li>We now operate the camera completely from specialKeyPress an mouseMovement:</li>
+</ul>
+<pre><code>void World::specialKeyPress(int key, int x, int y)
+{
+  if (projectors.isPerspective())
+  {
+    camera.specialKeyboard(key, x, y);
+  }
+  glutPostRedisplay();
+}
+
+void World::mouseMovement(int x, int y)
+{
+  camera.mouseMovement(x,y);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Nothing happening? - we have to register the two callbacks we introduced in the World::Initiualise:</p>
+</li>
+</ul>
+<pre><code>  glutSpecialFunc(keyboardSpecial);
+  glutPassiveMotionFunc(::mouseMovement);
+</code></pre>
+
+<ul>
+<li>Build and test - the camera should be operational - remember to use the mouse + arrow keys</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Cube</h2>
+<ul>
+<li>Introduce a new class call ColourCube - into the scene package:</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;actor.h&quot;
+
+struct ColourCube: public  Actor
+{
+  ColourCube(Geometry* g);
+  void render();
+};
+</code></pre>
+
+<pre><code>#include &quot;libs.h&quot;
+#include &quot;colourcube.h&quot;
+#include &quot;Color.h&quot;
+
+ColourCube::ColourCube(Geometry* g) : Actor(g)
+{}
+
+void ColourCube::render()
+{
+  Actor::render();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>We can identify a cube from our model - in this OBJ file here there is one called 'cube2':</p>
+</li>
+<li>
+<p><a href="../archives/testcube.obj">testcube.obj</a></p>
+</li>
+<li>
+<p>generated from this may file here:</p>
+</li>
+<li>
+<p><a href="../archives/model.mb">model.mb</a></p>
+</li>
+<li>
+<p>In the Scene constructor - we can identify this object, and have our ColourCube class constructed to use its geometry:</p>
+</li>
+</ul>
+<pre><code>  foreach (GeometryMap::value_type &amp;amp;value, model-&gt;entities)
+  {
+    string name = value.first;
+    Actor *actor;
+    if (name == &quot;cube&quot;)
+    {
+      actor = new CubeActor(&amp;amp;value.second);
+      animateActors[name] = (AnimateActor*) actor;
+    }
+    else if (name == &quot;cube2&quot;)
+    {
+      actor = new ColourCube(&amp;amp;value.second);
+    }
+    else
+    {
+      actor = new Actor(&amp;amp;value.second);
+    }
+    actors.insert(name, actor);
+  }
+</code></pre>
+
+<ul>
+<li>
+<p>(Not the physics cube actor is still there from last weeks lab).</p>
+</li>
+<li>
+<p>Build and test. There should be no change to the scene yet.</p>
+</li>
+<li>
+<p>Just to confirm that we our code is actually having an influence, change the polygon mode to "FILL" in the ColourCube render:</p>
+</li>
+</ul>
+<pre><code>void ColourCube::render()
+{
+  glPolygonMode(GL_FRONT,GL_FILL);
+  Actor::render();
+  glPolygonMode(GL_FRONT,GL_LINE);
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: ColourCube</h2>
+<ul>
+<li>We can completely override the default rendering, and code it ourselves:</li>
+</ul>
+<pre><code>void ColourCube::render()
+{
+  glShadeModel(GL_FLAT);
+  glPolygonMode(GL_FRONT,GL_FILL);
+  foreach (Face &amp;amp;face, geometry-&gt;faces)
+  {
+    face.render(geometry-&gt;vertexGroup-&gt;vertices);
+  }
+  glPolygonMode(GL_FRONT,GL_LINE);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Verify that this works.</p>
+</li>
+<li>
+<p>Or we could completely render all of the geometry in our render:</p>
+</li>
+</ul>
+<pre><code>void ColourCube::render()
+{
+  glShadeModel(GL_FLAT);
+  glPolygonMode(GL_FRONT,GL_FILL);
+  foreach (Face &amp;amp;face, geometry-&gt;faces)
+  {
+    glBegin(GL_QUADS);
+
+    foreach (int index, face.vertexIndices)
+    {
+      glVertex3f( geometry-&gt;vertexGroup-&gt;vertices[index-1].X,
+                  geometry-&gt;vertexGroup-&gt;vertices[index-1].Y,
+                    geometry-&gt;vertexGroup-&gt;vertices[index-1].Z );
+    }
+    glEnd();
+  }
+  glPolygonMode(GL_FRONT,GL_LINE);
+}
+
+</code></pre>
+
+<ul>
+<li>This allows some simple experiments. Introduce the following colour table into the colourcube.cpp file:</li>
+</ul>
+<pre><code>Color colours[] =
+{
+  Color::White,   Color::Yellow, Color::Red,     Color::Magenta,
+  Color::Cyan,    Color::Green,  Color::Black,   Color::Blue,
+  Color::Cyan,    Color::White,  Color::Magenta, Color::Blue,
+  Color::Green,   Color::Yellow, Color::Red,     Color::Black,
+  Color::White,   Color::Cyan,   Color::Green,   Color::Yellow,
+  Color::Magenta, Color::Blue,   Color::Black,   Color::Red
+};
+</code></pre>
+
+<ul>
+<li>This defines a set of colours for the vertices - rework render to use this table:</li>
+</ul>
+<pre><code>
+void ColourCube::render()
+{
+  glShadeModel(GL_FLAT);
+  glPolygonMode(GL_FRONT,GL_FILL);
+  int edge=0;
+  foreach (Face &amp;amp;face, geometry-&gt;faces)
+  {
+    glBegin(GL_QUADS);
+
+    foreach (int index, face.vertexIndices)
+    {
+      colours[edge].render();
+      glVertex3f( geometry-&gt;vertexGroup-&gt;vertices[index-1].X,
+                  geometry-&gt;vertexGroup-&gt;vertices[index-1].Y,
+                  geometry-&gt;vertexGroup-&gt;vertices[index-1].Z );
+      edge++;
+    }
+    glEnd();
+  }
+  glPolygonMode(GL_FRONT,GL_LINE);
+  Color::White.render();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Change polygon mode to GL_LINE - build and test.</p>
+</li>
+<li>
+<p>Change shade model to GL_SMOOTH - build and test</p>
+</li>
+<li>
+<p>Finally, try GL_LINE &amp; GL_SMOOTH.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Exercises</h2>
+<h2>Exercise 1</h2>
+<ul>
+<li>
+<p>You will have seen that the camera in this lab adopts a 'third person' type perspective - and was influenced by the geometry calculations in this tutorial here:</p>
+</li>
+<li>
+<p>http://www.swiftless.com/tutorials/opengl/camera3.html</p>
+</li>
+<li>
+<p>Our earlier camera was influenced these one here:</p>
+</li>
+<li>
+<p>http://www.swiftless.com/tutorials/opengl/camera.html</p>
+</li>
+<li>
+<p>You have to code for both these camera implementations. As we did with Projections - incorporate both classes into a simple class hierarchy - and adopt some key to switch cameras -'c' say. How much of the camera implementations can be retained in a camera base class - and how much in the derived classes?</p>
+</li>
+</ul>
+<h2>Exercise 2</h2>
+<ul>
+<li>
+<p>Build another custom object - to be called "JetPlane" - here is the geometry:</p>
+</li>
+<li>
+<p><a href="../archives/jetplanegeometry.h">jetplanegeomerty.h</a></p>
+</li>
+<li>
+<p>When loaded, the geometry should render as follows:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<p><img alt="" src="../img/01.png"></p>
+<p><img alt="" src="../img/02.png"></p>
+<ul>
+<li>Write a class - derived from Actor - which will render this.</li>
+</ul>
+<h2>Exercise 3</h2>
+<ul>
+<li>You will have noticed that the colour cube is out of sync - i.e. the colours do not line up to smoothly transition along the axes as expected. See if you can fix this be rearrarnging the color table. Alternatively redraw the geometry to get the colour axes aligned.</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

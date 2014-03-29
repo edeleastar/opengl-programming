@@ -1,0 +1,294 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Scenes, Lighting & Modeling </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Scenes, Lighting & Modeling</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Rename </a>
+          <a class="item" data-tab="step04"> Package </a>
+          <a class="item" data-tab="step05"> Model </a>
+          <a class="item" data-tab="step06"> Review </a>
+          <a class="item" data-tab="step07"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Install and configure Visual Paradigm</p>
+</li>
+<li>
+<p>Reverse engineer our current engine codebase and generate class diagrams</p>
+</li>
+<li>
+<p>Tune the model to be more expressive and coherent</p>
+</li>
+<li>
+<p>Examine the creation of sequence diagrams</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Clone lab11_lighting from the last lab - and call the new project lab11_modelling. Use this version here if you like:</p>
+</li>
+<li>
+<p><a href="../archives/lab11_lighting.zip">lab11_lighting.zip</a></p>
+</li>
+<li>
+<p>Download Visual Paradigm Community Edition:</p>
+</li>
+<li>
+<p>http://www.visual-paradigm.com/download/vpuml.jsp?edition=ce</p>
+</li>
+<li>
+<p>Follow the instructions - and install the standard edition. You will need this codes here:</p>
+</li>
+<li>
+<p>20L4W-4F6Z3-Y5C27-Y3C99-10MN8</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Rename</h2>
+<ul>
+<li>
+<p>Before commencing the modelling exercise, we will perform one renaming exercise, to clarify the world package somewhat.</p>
+</li>
+<li>
+<p>The name "Cameras" is too close to "Camera", so we will rename the former to "CameraRig". Using Eclipse, do this in these steps:</p>
+</li>
+<li>
+<p>Rename the source file 'cameras.h' to 'camerarig.h'</p>
+</li>
+<li>
+<p>Rename the source file 'cameras.cpp' to 'camerarig.cpp'</p>
+</li>
+<li>
+<p>Track down all reference to cameras.h and change them to camerarig.cpp (there should just be 2)</p>
+</li>
+<li>
+<p>Using eclipse refactoring menu - </p>
+</li>
+</ul>
+<p><img alt="" src="../img/16.png"></p>
+<ul>
+<li>
+<p>rename the class itself to CameraRig</p>
+</li>
+<li>
+<p>This should change all the relevant references - rebuild to verify</p>
+</li>
+<li>
+<p>Finally, in World, rename the variable cameras to cameraRig (you can also do this using the refactoring menu)</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Package</h2>
+<ul>
+<li>In Visual Paradigm, create a blank uml2 project using File-&gt;New Project:</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>The diagram navigator should appear on the left - select "Class Diagram" and, form the context menu, create a new Class Diagram:</li>
+</ul>
+<p><img alt="" src="../img/01.png"></p>
+<ul>
+<li>Create four packages (this is under "Common" in tools) called Model, Scene, Physics, World and Utils.</li>
+</ul>
+<p><img alt="" src="../img/02.png"></p>
+<ul>
+<li>Note the red underlining of the packages. This is due to over zealous quality checking. You should be able to select it:</li>
+</ul>
+<p><img alt="" src="../img/04.png"></p>
+<ul>
+<li>and disable it:</li>
+</ul>
+<p><img alt="" src="../img/05.png"></p>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Model</h2>
+<ul>
+<li>
+<p>Top populate model, we could manually create all of the classes.</p>
+</li>
+<li>
+<p>However, this tool as a reverse engineering feature which will automate much of the work.</p>
+</li>
+<li>
+<p>Select "Tools-&gt;Code Engineering-&gt;Instant Reverse-&gt;C++ Source"</p>
+</li>
+</ul>
+<p><img alt="" src="../img/08.png"></p>
+<ul>
+<li>
+<p>Accessing this feature will require a licence upgrade. We will accept the switch to 'Standard' edition, and use the trial license for the moment.</p>
+</li>
+<li>
+<p>On the next screen, navigate to the 'model' folder of our project C++ source and press ok:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/17.png"></p>
+<ul>
+<li>On the next screen, make sure to call the diagram 'Model' and select the following options:</li>
+</ul>
+<p><img alt="" src="../img/18.png"></p>
+<ul>
+<li>and also these options on the "Form Diagram Options"</li>
+</ul>
+<p><img alt="" src="../img/19.png"></p>
+<ul>
+<li>All of the above will generate the following mode:</li>
+</ul>
+<p><img alt="" src="../img/22.png"></p>
+<ul>
+<li>
+<p>Using exactly the same procedure, reverse engineer</p>
+</li>
+<li>
+<p>Scene</p>
+</li>
+<li>
+<p>Physics</p>
+</li>
+<li>
+<p>Utils</p>
+</li>
+<li>
+<p>World.</p>
+</li>
+<li>
+<p>The models you generate should look like these:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/23.png"></p>
+<p><img alt="" src="../img/24.png"></p>
+<p><img alt="" src="../img/25.png"></p>
+<p><img alt="" src="../img/26.png"></p>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: Review</h2>
+<ul>
+<li>
+<p>The class diagrams are to a large extent accurate - but they will need to be manuall laid out if they are to communicate a design effectively.</p>
+</li>
+<li>
+<p>Here is a better representation of World:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/27.png"></p>
+<ul>
+<li>
+<p>To simplify the diagram, Vector3 has been removed, and also some unneccessary dependencies between World and CameraRig and Projectors have been removed. Otherwsie, the diagram is accurate.</p>
+</li>
+<li>
+<p>We can simplify the diagram by hiding all class attributes. To do this, select "Edit-&gt;Select all". Then right click and select "Presentation Options-&gt;Attributes-&gt;Hide all:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/28.png"></p>
+<ul>
+<li>Also, selecting all classes, we can set 'Style-&gt;Trnasparent'. this version is more effective at communicating the core design:</li>
+</ul>
+<h2>World</h2>
+<p><img alt="" src="../img/29.png"></p>
+<ul>
+<li>These are the remaining packages:</li>
+</ul>
+<h2>Model</h2>
+<p><img alt="" src="../img/30.png"></p>
+<h2>Scene</h2>
+<p><img alt="" src="../img/31.png"></p>
+<h2>Physics</h2>
+<p><img alt="" src="../img/32.png"></p>
+<h2>Utils</h2>
+<p><img alt="" src="../img/33.png"></p>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Exercises</h2>
+<ul>
+<li>
+<p>This is the complete visual paradigm model:</p>
+</li>
+<li>
+<p><a href="../archives/enginex.vpp">enginex.vpp</a></p>
+</li>
+</ul>
+<h2>Sequence Diagrams</h2>
+<ul>
+<li>
+<p>Experiment with the Sequence Diagram feature. Remember, you can drag and drop classes from the "Class Repository" directly onto the sequence diagram canvas (select 'lifeline' when you drop the class).</p>
+</li>
+<li>
+<p>Here is a sample:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/34.png"></p>
+<ul>
+<li>
+<p>Try to compose a diagram for a model load scenario</p>
+</li>
+<li>
+<p>You might find this UML reference useful:</p>
+</li>
+<li>
+<p>http://www.holub.com/goodies/uml/</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

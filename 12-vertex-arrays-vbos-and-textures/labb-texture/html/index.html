@@ -1,0 +1,509 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> VBOs & Textures </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">VBOs & Textures</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Soil </a>
+          <a class="item" data-tab="step04"> ImageCube </a>
+          <a class="item" data-tab="step05"> Image Load </a>
+          <a class="item" data-tab="step06"> Image Bind </a>
+          <a class="item" data-tab="step07"> Sphere </a>
+          <a class="item" data-tab="step08"> Planets </a>
+          <a class="item" data-tab="step09"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Incorporate image based textures onto the surface of some actors.</p>
+</li>
+<li>
+<p>Using the Soil open source opengl imaging library:</p>
+</li>
+<li>
+<p>Load images onto the faces of a cube</p>
+</li>
+<li>
+<p>Define a sphere using OpenGL Quadrics - and map a planetary surface onto it such that it is not distorded</p>
+</li>
+<li>
+<p>As an exercise, explore loading multiple images/textured onto a singe cube</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Use the output of the last lab, or clone this project here:</p>
+</li>
+<li>
+<p><a href="../archives/lab12a_vbo.zip">lab12a_vbo.zip</a></p>
+</li>
+<li>
+<p>Call the project lab12b_texture</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Soil</h2>
+<ul>
+<li>
+<p>OpenGL does not address image formats, as they are beyond its remit. This library here:</p>
+</li>
+<li>
+<p>http://lonesock.net/soil.html</p>
+</li>
+<li>
+<p>provides a usable framework for importing a range of image file formats into opengl. Download the source from here:</p>
+</li>
+<li>
+<p>http://www.lonesock.net/files/soil.zip</p>
+</li>
+<li>
+<p>and unzip somewhere convenient. </p>
+</li>
+<li>
+<p>Create a folder inside the 'util' folder in your project.</p>
+</li>
+<li>
+<p>Drag and drop the contents of the 'src' folder from the SOIL library into this folder - excluding the test file. Your workspace may look like this:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>
+<p>Rebuild the project. </p>
+</li>
+<li>
+<p>On Windows - it should build successfully (famous last words). On mac you will need on adjustment: Add</p>
+</li>
+</ul>
+<pre><code>-framework CoreFoundation
+</code></pre>
+
+<ul>
+<li>
+<p>..to the linker</p>
+</li>
+<li>
+<p>Build - the application should compile and link successfully.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: ImageCube</h2>
+<ul>
+<li>We define an actor we are going to use to experiment with the textures:</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;actor.h&quot;
+
+struct ImageCube: public  Actor
+{
+  ImageCube();
+  void render();
+};
+</code></pre>
+
+<pre><code>#include &quot;libs.h&quot;
+#include &quot;imagecube.h&quot;
+
+using namespace std;
+
+Vector3 thevertices[][6] =
+{
+  { Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3( 1.0f, -1.0f, 1.0f), Vector3( 1.0f, 1.0f, 1.0f)  },
+  { Vector3( 1.0f, 1.0f,-1.0f), Vector3( 1.0f, -1.0f,-1.0f), Vector3(-1.0f, -1.0f,-1.0f), Vector3(-1.0f, 1.0f, -1.0f) },
+  { Vector3(-1.0f, 1.0f,-1.0f), Vector3(-1.0f,  1.0f, 1.0f), Vector3( 1.0f,  1.0f, 1.0f), Vector3( 1.0f, 1.0f, -1.0f) },
+  { Vector3( 1.0f,-1.0f,-1.0f), Vector3( 1.0f, -1.0f, 1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f,-1.0f, -1.0f) },
+  { Vector3( 1.0f,-1.0f, 1.0f), Vector3( 1.0f, -1.0f,-1.0f), Vector3( 1.0f,  1.0f,-1.0f), Vector3( 1.0f, 1.0f,  1.0f) },
+  { Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, -1.0f,-1.0f), Vector3(-1.0f, -1.0f, 1.0f) }
+};
+
+void drawFace(Vector3 vertices[])
+{
+  vertices[0].render();
+  vertices[1].render();
+  vertices[2].render();
+  vertices[3].render();
+}
+
+ImageCube::ImageCube()
+{
+}
+
+void ImageCube::render()
+{
+  glPolygonMode(GL_FRONT,GL_FILL);
+  glBegin( GL_QUADS);
+  for (int i=0; i&lt;6; i++)
+  {
+    drawFace(thevertices[i]);
+  }
+  glEnd();
+  glPolygonMode(GL_FRONT,GL_LINE);
+}
+</code></pre>
+
+<ul>
+<li>Introduce one of these actors into your scene:</li>
+</ul>
+<pre><code>  actorName = &quot;imagecube&quot;;
+  actors.insert(actorName, new ImageCube());
+</code></pre>
+
+<ul>
+<li>Build and test. You should have a simple white cube at the origin.</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Image Load</h2>
+<ul>
+<li>In materials.h, prototype a function to load a texture from an image file:</li>
+</ul>
+<pre><code>GLuint loadTexture(std::string filename);
+</code></pre>
+
+<ul>
+<li>Implement this function in materials.cpp</li>
+</ul>
+<pre><code>GLuint loadTexture(string filename)
+{
+  GLuint tex_ID = SOIL_load_OGL_texture
+           (filename.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+            (SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y |
+             SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT) );
+  return tex_ID;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>You will need to include soil.h, and place the soil library on the include path.</p>
+</li>
+<li>
+<p>Verify that the project builds.</p>
+</li>
+<li>
+<p>In the class ImageLoad, introduce a handle for an image we are going to load:</p>
+</li>
+</ul>
+<pre><code>struct ImageCube: public  Actor
+{
+  int imageID;
+  //...
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Incorporate this image file into your project (place it on the path in the root of the project alongside the model files)</p>
+</li>
+<li>
+<p><a href="../archives/city.png">city.png</a></p>
+</li>
+<li>
+<p>and in the constructor, load the image using the Soil library:</p>
+</li>
+</ul>
+<pre><code>ImageCube::ImageCube()
+{
+  imageID = loadTexture(&quot;city.png&quot;);
+}
+</code></pre>
+
+<ul>
+<li>If all this builds, we are ready to bind the texture to the cube.</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: Image Bind</h2>
+<ul>
+<li>
+<p>With the image loaded, we can attempt to bind the texture to the faces of the cube.</p>
+</li>
+<li>
+<p>This is carried out by enabling texture support, calling glBindTexture with the image id, and then rendering as normal.</p>
+</li>
+</ul>
+<pre><code>void ImageCube::render()
+{
+  glPolygonMode(GL_FRONT,GL_FILL);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, imageID);
+
+  glBegin( GL_QUADS);
+  for (int i=0; i&lt;6; i++)
+  {
+    drawFace(thevertices[i]);
+  }
+  glEnd();
+
+  glDisable(GL_TEXTURE_2D);
+  glPolygonMode(GL_FRONT,GL_LINE);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>We disable texturing at the end of the render.</p>
+</li>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>You will notice that our image fails to appear. This is because the bind of the texture relies on a mapping from texture co-ordinates to the vertex space as defined by our co-ordinate geometry.</p>
+</li>
+<li>
+<p>For each vertex, we output a texture co-ordinate, which indicates which aspect of the loaded texture is to be loaded mapped at the given vertex.</p>
+</li>
+<li>
+<p>We would like the entire image to be loaded onto each face - hence we define the following texture coordinates:</p>
+</li>
+</ul>
+<pre><code>void drawFace(Vector3 vertices[])
+{
+  glTexCoord2f(0.0, 0.0);
+  vertices[0].render();
+  glTexCoord2f(0.0, 1.0);
+  vertices[1].render();
+  glTexCoord2f(1.0, 1.0);
+  vertices[2].render();
+  glTexCoord2f(1.0, 0.0);
+  vertices[3].render();
+}
+</code></pre>
+
+<ul>
+<li>Build and test - you should see the cube rendered thus:</li>
+</ul>
+<p><img alt="" src="../img/01.png"></p>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Sphere</h2>
+<ul>
+<li>
+<p>This is a jpeg of an image of the earth:</p>
+</li>
+<li>
+<p><a href="../archives/earth.jpg">earth.jpg</a></p>
+</li>
+<li>
+<p>Note that it has been 'distorted' - that is it is structured such that it will map correctly to a sphere, if the texture co-ordinates are suitably defined.</p>
+</li>
+<li>
+<p>Incorporate the following class into your scene folder:</p>
+</li>
+</ul>
+<pre><code>#pragma once
+#include &quot;actor.h&quot;
+
+struct Sphere: public  Actor
+{
+  int imageID;
+
+  Sphere();
+  void render();
+};
+</code></pre>
+
+<pre><code>#include &quot;libs.h&quot;
+#include &quot;sphere.h&quot;
+#include &quot;materials.h&quot;
+
+using namespace std;
+
+Sphere::Sphere()
+{
+  imageID = loadTexture(&quot;earth.jpg&quot;);
+}
+
+void Sphere::render()
+{
+  glPolygonMode(GL_FRONT,GL_FILL);
+  glEnable(GL_TEXTURE_2D);
+
+  GLUquadric *qobj = gluNewQuadric();
+  gluQuadricTexture(qobj,GL_TRUE);
+  glBindTexture(GL_TEXTURE_2D, imageID);
+
+  glPushMatrix();
+    Vector3(2,2,2).translate();
+    gluSphere(qobj,1,50,50);
+  glPopMatrix();
+
+  gluDeleteQuadric(qobj);
+
+  glPolygonMode(GL_FRONT,GL_LINE);
+  glDisable(GL_TEXTURE_2D);
+}
+</code></pre>
+
+<ul>
+<li>
+<p>This will draw a sphere, using the Glu Quadric functions:</p>
+</li>
+<li>
+<p>http://en.wikipedia.org/wiki/Quadric</p>
+</li>
+<li>
+<p>http://nehe.gamedev.net/tutorial/quadrics/20001/</p>
+</li>
+<li>
+<p>In particular, note that we are generating unit texture mapping for the sphere:</p>
+</li>
+</ul>
+<pre><code>  gluQuadricTexture(qobj,GL_TRUE);
+  glBindTexture(GL_TEXTURE_2D, imageID);
+</code></pre>
+
+<ul>
+<li>Also note we are manually moving the sphere away from the origin in this code here:</li>
+</ul>
+<pre><code>  glPushMatrix();
+    Vector3(2,2,2).translate();
+    gluSphere(qobj,1,50,50);
+  glPopMatrix();
+</code></pre>
+
+<ul>
+<li>This should build and render like this:</li>
+</ul>
+<p><img alt="" src="../img/02.png"></p>
+	  </section>
+	  <section data-tab="step08" class="ui tab stacked clarity-book segment">
+	     <h2>07: Planets</h2>
+<ul>
+<li>Refactor the Sphere class to take the image and initial position as constructor parameters:</li>
+</ul>
+<pre><code>struct Sphere: public  Actor
+{
+  int     imageID;
+  Vector3 position;
+
+  Sphere(Vector3 position, std::string imagefile);
+  void render();
+};
+</code></pre>
+
+<pre><code>Sphere::Sphere(Vector3 position, string imagefilename)
+: position (position)
+{
+  imageID = loadTexture(imagefilename);
+}
+
+void Sphere::render()
+{
+  //...
+  glPushMatrix();
+    position.translate();
+    gluSphere(qobj,1,50,50);
+  glPopMatrix();
+  //..
+}
+</code></pre>
+
+<ul>
+<li>Chance scene to provide these parameters:</li>
+</ul>
+<pre><code>  actorName = &quot;earth&quot;;
+  actors.insert(actorName, new Sphere(Vector3(2,2,2), &quot;earth.jpg&quot;));
+</code></pre>
+
+<ul>
+<li>
+<p>This site here provides a range of planetary images - suitably mapped:</p>
+</li>
+<li>
+<p>http://planetpixelemporium.com/planets.html</p>
+</li>
+<li>
+<p>Bring in a few images - and create associated sphere objects... a scene like this should be easy to create:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/03.png"></p>
+	  </section>
+	  <section data-tab="step09" class="ui tab stacked clarity-book segment">
+	     <h2>08: Exercises</h2>
+<h2>Multiple Images on each cube</h2>
+<ul>
+<li>
+<p>Try to load a different image onto each face of the cube.</p>
+</li>
+<li>
+<p>NB: Textures behave very differently if bound inside glBegin()/glEnd() than if they are bound outside. For this to work, you will have to bind each image before entering immediate mode. This will require a slightly more verbose ImageCube class</p>
+</li>
+<li>
+<p>How about have the same image rendered repeatedly over one side of a cube? This would require you to generate appropriate texture co-oridnates</p>
+</li>
+</ul>
+<h2>Mapping Saturn:</h2>
+<ul>
+<li>
+<p>Saturn is more interesting:</p>
+</li>
+<li>
+<p>http://planetpixelemporium.com/saturn.html</p>
+</li>
+<li>
+<p>The sphere itself is simple, but how would you map the rings? Note that there is a separate image file provided for this.</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>
