@@ -1,0 +1,465 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Wavefront, Models, Perspectives & Colour </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Wavefront, Models, Perspectives & Colour</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Projection </a>
+          <a class="item" data-tab="step04"> World </a>
+          <a class="item" data-tab="step05"> Main </a>
+          <a class="item" data-tab="step06"> Orthographic </a>
+          <a class="item" data-tab="step07"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Define an abstraction to represent the projection model</p>
+</li>
+<li>
+<p>Introduce 2 concrete projection classes:</p>
+</li>
+<li>
+<p>Orthographic</p>
+</li>
+<li>
+<p>Perspective</p>
+</li>
+<li>
+<p>Enhance the Orthographic projection to facilitate viewing the scene from different angles</p>
+</li>
+<li>
+<p>Devise a mechanism to enable switchable projection models - at runtime</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>This is an archive of lab07a_wavefront_2:</p>
+</li>
+<li>
+<p><a href="../archives/lab07a_wavefront_2.zip">lab07a_wavefront_2.zip</a></p>
+</li>
+<li>
+<p>but if you completed the lab, you should have this code already.</p>
+</li>
+<li>
+<p>Clone that project, and call the new project lab07b_wavefront_3</p>
+</li>
+<li>
+<p>Verify that the project runs and loads multiply object OBJ files.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Projection</h2>
+<ul>
+<li>We can model a projection as a very simple class:</li>
+</ul>
+<pre><code>typedef std::pair&lt;float, float&gt; Range;
+
+struct Projection
+{
+  Range windowSize;
+
+  void resize(Range size);
+  virtual void render()=0;
+};
+</code></pre>
+
+<ul>
+<li>With a single method implemented:</li>
+</ul>
+<pre><code>void Projection::resize(Range size)
+{
+  windowSize = size;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>With have to derived projections:</p>
+</li>
+<li>
+<p>(1) Orthographic:</p>
+</li>
+</ul>
+<pre><code>struct Orthographic: public Projection
+{
+  Range xRange;
+  Range yRange;
+  Range zRange;
+
+  Orthographic(Range x, Range y, Range z);
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>and (2) Perspective:</li>
+</ul>
+<pre><code>struct Perspective : public Projection
+{
+  float fovy;
+  Range zRange;
+  float zDistance;
+
+  Perspective (float fovy, Range zRange, float zDistance);
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>The orthographic implementation of </li>
+</ul>
+<pre><code>Orthographic::Orthographic(Range x, Range y, Range z)
+: xRange(x), yRange(y), zRange(z)
+{
+}
+
+void Orthographic::render()
+{
+  glLoadIdentity();
+  glViewport(0, 0, windowSize.first, windowSize.second);
+  glMatrixMode ( GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(xRange.first, xRange.second, yRange.first, yRange.second, zRange.first, zRange.second);
+  glMatrixMode ( GL_MODELVIEW);
+}
+</code></pre>
+
+<ul>
+<li>And the perspective implementation:</li>
+</ul>
+<pre><code>Perspective::Perspective (float fovy, Range zRange, float zDistance)
+: fovy(fovy), zRange(zRange), zDistance(zDistance)
+{
+}
+
+void Perspective::render()
+{
+  glLoadIdentity();
+  glViewport(0, 0, windowSize.first, windowSize.second);
+  glMatrixMode (GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(fovy, windowSize.first/windowSize.second, zRange.first, zRange.second);
+  glMatrixMode (GL_MODELVIEW);
+  Vector3(0,0,zDistance).translate();
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: World</h2>
+<ul>
+<li>The World had been a class in the last lab:</li>
+</ul>
+<pre><code>class World
+{
+  public:
+    static World&amp;amp; GetInstance();
+
+    void setCmdlineParams(int*argc, char **argv);
+    void initialize(int width, int height, std::string name);
+    void start();
+    void loadModel (std::string modelName);
+
+    void render();
+    void keyPress(unsigned char ch);
+
+  private:
+    static World* s_World;
+    Model theModel;
+    int   *argc;
+    char **argv;
+};
+</code></pre>
+
+<ul>
+<li>Lets turn it back onto a struct again:</li>
+</ul>
+<pre><code>struct World
+{
+    static World&amp;amp; GetInstance();
+
+    void setCmdlineParams(int*argc, char **argv);
+    void initialize(int width, int height, std::string name);
+    void start();
+    void loadModel (std::string modelName);
+
+    void render();
+    void keyPress(unsigned char ch);
+
+    static World* s_World;
+    Model         theModel;
+    Projection   *currentProjection;
+    ProjectionMap projections;
+
+    int   *argc;
+    char **argv;
+};
+</code></pre>
+
+<p>Introduce a new member, which will be the current projection in force:</p>
+<pre><code>///
+    Projection   *currentProjection;
+///
+</code></pre>
+
+<ul>
+<li>In world, the reshape function must trigger a call to reset the projection:</li>
+</ul>
+<pre><code>void reshape(int w, int h)
+{
+  theWorld.currentProjection-&gt;resize(Range(w,h));
+  theWorld.currentProjection-&gt;render();
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Main</h2>
+<ul>
+<li>We must establish the projection in main:</li>
+</ul>
+<pre><code>int main(int argc, char* argv[])
+{
+  theWorld.setCmdlineParams(&amp;amp;argc, argv);
+  theWorld.initialize(800,600, &quot;First World&quot;);
+
+  theWorld.loadModel(&quot;model.obj&quot;);
+  theWorld.currentProjection = new Orthographic (Range(-10,10), Range(-10,10), Range(-10,10));
+  theWorld.start();
+  return 0;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Run and verify the projection is Orthographic</p>
+</li>
+<li>
+<p>We could replace the projection model, recompile, and run again with the following:</p>
+</li>
+</ul>
+<pre><code>  //theWorld.currentProjection = new Orthographic (Range(-10,10), Range(-10,10), Range(-10,10));
+  theWorld.currentProjection = new Perspective(60, Range(1,1000), -10);
+</code></pre>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: Orthographic</h2>
+<ul>
+<li>Returning to the Orthographic class, we can extend it such that it is parameterised in more interesting ways:</li>
+</ul>
+<pre><code>struct Orthographic: public Projection
+{
+  Range xRange;
+  Range yRange;
+  Range zRange;
+  Vector3 axis;
+  int angle;
+
+  Orthographic(Range x, Range y, Range z, int angle, Vector3 axis);
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>i.e. we are specifying the angle we with to view the scene from, relevant to a specific axis. This requires a simple change to render:</li>
+</ul>
+<pre><code>Orthographic::Orthographic(Range x, Range y, Range z, int theAngle, Vector3 theAxis)
+: xRange(x), yRange(y), zRange(z), angle(theAngle), axis(theAxis)
+{
+}
+
+void Orthographic::render()
+{
+  glLoadIdentity();
+  glViewport(0, 0, windowSize.first, windowSize.second);
+  glMatrixMode ( GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(xRange.first, xRange.second, yRange.first, yRange.second, zRange.first, zRange.second);
+  glMatrixMode ( GL_MODELVIEW);
+
+  axis.rotate(angle);
+}
+</code></pre>
+
+<ul>
+<li>Build a number of alternative projections</li>
+</ul>
+<pre><code>  Projection *projection1 = new Orthographic (Range(-10,10), Range(-10,10), Range(-10,10), 90, Vector3::UnitX);
+  Projection *projection2 = new Orthographic (Range(-10,10), Range(-10,10), Range(-10,10), 90, Vector3::UnitY);
+  Projection *projection3 = new Orthographic (Range(-10,10), Range(-10,10), Range(-10,10), 90, Vector3::UnitZ);
+</code></pre>
+
+<ul>
+<li>and verify they work as expected</li>
+</ul>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>06: Exercises</h2>
+<h2>Perspective Switching</h2>
+<ul>
+<li>
+<p>Devise a design to have the projections switched at runtime by pressing key 1-4 along the following lines:</p>
+</li>
+<li>
+<p>'1': Perspective</p>
+</li>
+<li>
+<p>'2': Orthographic - viewing from above</p>
+</li>
+<li>
+<p>'3': Orthographic - viewing from the left</p>
+</li>
+<li>
+<p>'4': Orthographic - viewing from the right</p>
+</li>
+<li>
+<p>All of this should be possible by just adjusting these two functions:</p>
+</li>
+</ul>
+<pre><code>void reshape(int w, int h)
+{
+  theWorld.currentProjection-&gt;resize(Range(w,h));
+  theWorld.currentProjection-&gt;render();
+}
+
+void World::keyPress(unsigned char ch)
+{
+  ///
+  glutPostRedisplay();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>With some of the initialisation taking place in main.</p>
+</li>
+<li>
+<p>Just to get this working, use a simple array or a vector</p>
+</li>
+<li>
+<p>For a more sophisticated solution, see if you can implement a solution whereby you maintain a std::map of Projections, a reference to the current projection, and a simple mechanism for switching projections by retrieving a keyed element from the map.</p>
+</li>
+</ul>
+<h2>Boost Library Install</h2>
+<ul>
+<li>
+<p>Install the boost libraries:</p>
+</li>
+<li>
+<p><a href="http://www.boost.org">http://www.boost.org</a></p>
+</li>
+<li>
+<p>Instructions here:</p>
+</li>
+<li>
+<p><a href="http://www.boost.org/doc/libs/1_49_0/more/getting_started/windows.html">http://www.boost.org/doc/libs/1_49_0/more/getting_started/windows.html</a></p>
+</li>
+<li>
+<p><a href="http://www.boost.org/doc/libs/1_49_0/more/getting_started/unix-variants.html">http://www.boost.org/doc/libs/1_49_0/more/getting_started/unix-variants.html</a></p>
+</li>
+<li>
+<p>For what we need, there may not even be a requirement to compile - but proceed through the build process - only if it goes smoothly.</p>
+</li>
+<li>
+<p>However, if it doesnt, then we can still use the majority of the boost features - the so-called 'header only' components:</p>
+</li>
+<li>
+<p><a href="http://www.boost.org/doc/libs/1_33_1/?view=filtered_header-only">http://www.boost.org/doc/libs/1_33_1/?view=filtered_header-only</a></p>
+</li>
+<li>
+<p>Try one of the examples here to verify that it builds successfully:</p>
+</li>
+<li>
+<p><a href="http://www.boost.org/doc/libs/1_49_0/doc/html/foreach.html">http://www.boost.org/doc/libs/1_49_0/doc/html/foreach.html</a></p>
+</li>
+<li>
+<p>Have a look at this loop here in our model class:</p>
+</li>
+</ul>
+<pre><code>void Model::render()
+{
+   for (MeshMapIterator iter = entities.begin(); iter ##= entities.end(); iter++)
+    {
+      iter-&gt;second.render(defaultGroup.vertices);
+    }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Can you find a way of using foreach to replace this loop?</p>
+</li>
+<li>
+<p>We are particularly interested in this component here:</p>
+</li>
+<li>
+<p><a href="http://www.boost.org/doc/libs/1_49_0/libs/ptr_container/doc/tutorial.html">http://www.boost.org/doc/libs/1_49_0/libs/ptr_container/doc/tutorial.html</a></p>
+</li>
+<li>
+<p>See if you can build some of the example code in this tutorial</p>
+</li>
+</ul>
+<h2>Exercise 3: Camera</h2>
+<ul>
+<li>In earlier labs, we implemented a rudimentary mechanism for navigation a scene. Propose and implement a design whereby this is modeled as a Camera abstraction - that is placed within a scene and can be moved around via some keybaord sequences</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>

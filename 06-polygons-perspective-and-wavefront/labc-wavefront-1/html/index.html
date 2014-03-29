@@ -1,0 +1,1004 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Perspectives & Models </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Perspectives & Models</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Cube </a>
+          <a class="item" data-tab="step04"> World </a>
+          <a class="item" data-tab="step05"> OBJ Format </a>
+          <a class="item" data-tab="step06"> Faces </a>
+          <a class="item" data-tab="step07"> ModelObject </a>
+          <a class="item" data-tab="step08"> Model </a>
+          <a class="item" data-tab="step09"> World + Model </a>
+          <a class="item" data-tab="step10"> Vertices </a>
+          <a class="item" data-tab="step11"> Renering </a>
+          <a class="item" data-tab="step12"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Download and install Maya</p>
+</li>
+<li>
+<p>Generate a simple model </p>
+</li>
+<li>
+<p>Explore this model - and devise a set of classes to load and render it</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>Download and install Maya on your workstation. Free students versions are available here:</p>
+</li>
+<li>
+<p>http://students.autodesk.com/?nd=download_center</p>
+</li>
+<li>
+<p>You will need to register, acquire serial numbers, and activate the product.</p>
+</li>
+<li>
+<p>Once launched, it is worth talking the short tutorial movies before commencing:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>To enable Wafefront support, select "Window-&gt;Settings/Preferences-&gt;Plug-in Manager", locate "objExport bundle" from the list of components, and enable it:</li>
+</ul>
+<p><img alt="" src="../img/01.png"></p>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Cube</h2>
+<ul>
+<li>Press 'space' to see four views - and now create a simple drawing - lets say a cube:</li>
+</ul>
+<p><img alt="" src="../img/02.png"></p>
+<ul>
+<li>And export this as a wavefront format file:</li>
+</ul>
+<p><img alt="" src="../img/03.png"></p>
+<ul>
+<li>
+<p>(Note the "File Type Specific Options" selected on the right).</p>
+</li>
+<li>
+<p>Open the file "cube.obj" - it might look something like this:</p>
+</li>
+</ul>
+<pre><code># This file uses centimeters as units for non-parametric coordinates.
+
+g default
+v -3.271605 0.000000 3.333333
+v 3.827160 0.000000 3.333333
+v -3.271605 3.566200 3.333333
+v 3.827160 3.566200 3.333333
+v -3.271605 3.566200 -2.407407
+v 3.827160 3.566200 -2.407407
+v -3.271605 0.000000 -2.407407
+v 3.827160 0.000000 -2.407407
+vt 0.375000 0.000000
+vt 0.625000 0.000000
+vt 0.375000 0.250000
+vt 0.625000 0.250000
+vt 0.375000 0.500000
+vt 0.625000 0.500000
+vt 0.375000 0.750000
+vt 0.625000 0.750000
+vt 0.375000 1.000000
+vt 0.625000 1.000000
+vt 0.875000 0.000000
+vt 0.875000 0.250000
+vt 0.125000 0.000000
+vt 0.125000 0.250000
+g pCube1
+f 1/1 2/2 4/4 3/3
+f 3/3 4/4 6/6 5/5
+f 5/5 6/6 8/8 7/7
+f 7/7 8/8 2/10 1/9
+f 2/2 8/11 6/12 4/4
+f 7/13 1/1 3/3 5/14
+</code></pre>
+
+<ul>
+<li>
+<p>Review the format of this file briefly here:</p>
+</li>
+<li>
+<p>http://en.wikipedia.org/wiki/Wavefront_.obj_file</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: World</h2>
+<ul>
+<li>
+<p>Create a new C++ project - called lab06b_wavefront_1</p>
+</li>
+<li>
+<p>Incorporate these sources from the assignment 1 solution:</p>
+</li>
+</ul>
+<h3>color.h</h3>
+<pre><code>#pragma once
+
+struct Color
+{
+  float R;
+  float G;
+  float B;
+  float A;
+
+  static Color White;
+  static Color Yellow;
+  static Color Red;
+  static Color Magenta;
+  static Color Cyan;
+  static Color Green;
+  static Color Black;
+  static Color Blue;
+
+
+  Color();
+  Color(float r, float g, float b, float a=1.0f);
+  Color(int r, int g, int b, int a=255);
+
+  void render();
+  void renderClear();
+};
+</code></pre>
+
+<h3>color.cpp</h3>
+<pre><code>#include &quot;libopengl.h&quot;
+#include &quot;Color.h&quot;
+
+Color Color::Black   (0,     0,    0);
+Color Color::Blue    (0,     0,  255);
+Color Color::Green   (0,   255,    0);
+Color Color::Cyan    (0,   255,  255);
+Color Color::Red     (255,   0,    0);
+Color Color::Magenta (255,   0,  255);
+Color Color::Yellow  (255, 255,    0);
+Color Color::White   (255, 255,  255);
+
+
+Color::Color()
+{
+  R = G = B = A = 1.0f;
+}
+
+Color::Color(float r, float g, float b, float a)
+{
+  R = r;
+  G = g;
+  B = b;
+  A = a;
+}
+
+Color::Color(int r, int g, int b, int a)
+{
+  R = (float) r / 255.0f;
+  G = (float) g / 255.0f;
+  B = (float) b / 255.0f;
+  A = (float) a / 255.0f;
+}
+
+void Color::render()
+{
+  glColor4f(R,G,B,A);
+}
+
+void Color::renderClear()
+{
+  glClearColor(R,G,B, 1.0f);
+}
+</code></pre>
+
+<h3>vector3.h</h3>
+<pre><code>#pragma once
+#include &lt;istream&gt;
+
+struct Vector3
+{
+  float X;
+  float Y;
+  float Z;
+
+  static Vector3 UnitX;
+  static Vector3 UnitY;
+  static Vector3 UnitZ;
+
+  Vector3(float x, float y, float z);
+  Vector3(float value);
+  Vector3();
+  Vector3(std::istream&amp; is);
+
+  void translate();
+  void rotate (float angle);
+
+  void render();
+};
+
+</code></pre>
+
+<h3>vector3.cpp</h3>
+<pre><code>#include &quot;libopengl.h&quot;
+#include &quot;vector3.h&quot;
+using namespace std;
+
+Vector3 Vector3::UnitX(1.0f, 0.0f, 0.0f);
+Vector3 Vector3::UnitY(0.0f, 1.0f, 0.0f);
+Vector3 Vector3::UnitZ(0.0f, 0.0f, 1.0f);
+
+Vector3::Vector3(float x, float y, float z)
+: X(x)
+, Y(y)
+, Z(z)
+{}
+
+Vector3::Vector3(float value)
+: X(value)
+, Y(value)
+, Z(value)
+{}
+
+Vector3::Vector3()
+: X(0)
+, Y(0)
+, Z(0)
+{}
+
+Vector3::Vector3(istream &amp;is)
+{
+  is &gt;&gt; X &gt;&gt; Y &gt;&gt; Z;
+}
+
+void Vector3::render()
+{
+  glVertex3f(X, Y, Z);
+}
+
+void Vector3::translate()
+{
+  glTranslatef(X,Y,Z);
+}
+
+void Vector3::rotate (float angle)
+{
+  glRotatef(angle, X,Y,Z);
+}
+
+</code></pre>
+
+<h3>world.h</h3>
+<pre><code>#pragma once
+#include &lt;string&gt;
+
+#define theWorld World::GetInstance()
+
+class World
+{
+  public:
+    static World&amp; GetInstance();
+
+    void setCmdlineParams(int*argc, char **argv);
+    void initialize(int width, int height, std::string name);
+    void start();
+
+    void render();
+    void keyPress(unsigned char ch);
+
+  private:
+    static World* s_World;
+
+    int   *argc;
+    char **argv;
+};
+
+</code></pre>
+
+<h3>world.cpp</h3>
+<pre><code>#include &quot;world.h&quot;
+#include &quot;libopengl.h&quot;
+#include &quot;vector3.h&quot;
+#include &quot;color.h&quot;
+#include &lt;fstream&gt;
+using namespace std;
+
+World* World::s_World = NULL;
+
+void reshape(int w, int h)
+{
+  glViewport(0, 0, (GLsizei) w, (GLsizei) h); //set the viewportto the current window specifications
+  glMatrixMode ( GL_PROJECTION); //set the matrix to projection
+
+  glLoadIdentity();
+  gluPerspective(60, (GLfloat) w / (GLfloat) h, 1.0, 1000.0); //set the perspective (angle of sight, width, height, ,depth)
+  glMatrixMode ( GL_MODELVIEW); //set the matrix back to model
+}
+
+void renderScene(void)
+{
+  World::GetInstance().render();
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+  World::GetInstance().keyPress(key);
+}
+
+World&amp; World::GetInstance()
+{
+  if (s_World == NULL)
+  {
+    s_World = new World();
+  }
+  return *s_World;
+}
+
+void World::setCmdlineParams(int*argc, char **argv)
+{
+  this-&gt;argc = argc;
+  this-&gt;argv = argv;
+}
+
+void World::render()
+{
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+
+
+  glutSwapBuffers();
+}
+
+void World::keyPress(unsigned char ch)
+{
+  glutPostRedisplay();
+}
+
+
+void World::initialize(int width, int height, std::string name)
+{
+  glutInit(argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitWindowSize(width, height);
+  glutCreateWindow(name.c_str());
+
+  Color::Black.renderClear();
+  glEnable(GL_DEPTH_TEST);
+  glFrontFace(GL_CCW);
+  glPolygonMode(GL_FRONT,GL_LINE);
+  glPolygonMode(GL_BACK,GL_LINE);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(60.0f, 1, 1.0, 1000.0);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  //glTranslatef(0.0f, 0.0f, -200.0f);
+  glutKeyboardFunc(keyboard);
+  glutReshapeFunc(reshape);
+  glutDisplayFunc(renderScene);
+}
+
+void World::start()
+{
+  glutMainLoop();
+}
+</code></pre>
+
+<h3>main.cpp</h3>
+<pre><code>#include &quot;world.h&quot;
+
+int main(int argc, char* argv[])
+{
+  theWorld.setCmdlineParams(&amp;argc, argv);
+  theWorld.initialize(800,600, &quot;First World&quot;);
+
+  theWorld.start();
+  return 0;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>You should have your own version of libopengl.h</p>
+</li>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>Have a close look at the world class - and gain an understanding of its relationship to glut.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: OBJ format</h2>
+<ul>
+<li>Looking at the example file again:</li>
+</ul>
+<pre><code># This file uses centimeters as units for non-parametric coordinates.
+
+g default
+v -5.251874 0.000000 0.717793
+v 3.835506 0.000000 0.717793
+v -5.251874 2.495711 0.717793
+v 3.835506 2.495711 0.717793
+v -5.251874 2.495711 -2.094055
+v 3.835506 2.495711 -2.094055
+v -5.251874 0.000000 -2.094055
+v 3.835506 0.000000 -2.094055
+vt 0.375000 0.000000
+vt 0.625000 0.000000
+vt 0.375000 0.250000
+vt 0.625000 0.250000
+vt 0.375000 0.500000
+vt 0.625000 0.500000
+vt 0.375000 0.750000
+vt 0.625000 0.750000
+vt 0.375000 1.000000
+vt 0.625000 1.000000
+vt 0.875000 0.000000
+vt 0.875000 0.250000
+vt 0.125000 0.000000
+vt 0.125000 0.250000
+g pCube1
+f 1/1 2/2 4/4 3/3
+f 3/3 4/4 6/6 5/5
+f 5/5 6/6 8/8 7/7
+f 7/7 8/8 2/10 1/9
+f 2/2 8/11 6/12 4/4
+f 7/13 1/1 3/3 5/14
+</code></pre>
+
+<ul>
+<li>
+<p>We see:</p>
+</li>
+<li>
+<p>opening comment (begining with #)</p>
+</li>
+<li>
+<p>a group (denoted 'g') - called default</p>
+</li>
+<li>
+<p>A set of 8 vertices (denoted by 'vt')</p>
+</li>
+<li>
+<p>A collection of vertex texture coordinates ('vt')</p>
+</li>
+<li>
+<p>another group - this time called 'pCube1'</p>
+</li>
+<li>
+<p>set of faces, where each face is:</p>
+</li>
+<li>
+<p>*vertex index (into default), '/', texture index (also into default).</p>
+</li>
+<li>
+<p>Reverse engineering the above, what we have is a set of vertices as folllows:</p>
+</li>
+</ul>
+<pre><code>face 1
+-5.25187 0 0.717793
+3.83551 0 0.717793
+3.83551 2.49571 0.717793
+-5.25187 2.49571 0.717793
+face 2
+-5.25187 2.49571 0.717793
+3.83551 2.49571 0.717793
+3.83551 2.49571 -2.09405
+-5.25187 2.49571 -2.09405
+face 3
+-5.25187 2.49571 -2.09405
+3.83551 2.49571 -2.09405
+3.83551 0 -2.09405
+-5.25187 0 -2.09405
+face 4
+-5.25187 0 -2.09405
+3.83551 0 -2.09405
+3.83551 0 0.717793
+-5.25187 0 0.717793
+face 5
+3.83551 0 0.717793
+3.83551 0 -2.09405
+3.83551 2.49571 -2.09405
+3.83551 2.49571 0.717793
+face 6
+-5.25187 0 -2.09405
+-5.25187 0 0.717793
+-5.25187 2.49571 0.717793
+-5.25187 2.49571 -2.09405
+</code></pre>
+
+<ul>
+<li>Using the last lab, we could easily verify this geometry by drawing a set of QUADS using these vertices.</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>04: Faces</h2>
+<ul>
+<li>A face in our current model example looks like this:</li>
+</ul>
+<pre><code>f 1/1 2/2 4/4 3/3
+</code></pre>
+
+<ul>
+<li>
+<p>... each of these represents a vertex/texture index into the 'default' group as we have demonstrated.</p>
+</li>
+<li>
+<p>We can abstract this into a "Face" class:</p>
+</li>
+</ul>
+<pre><code>struct Face
+{
+  int vertices[3];
+  int textures[3];
+
+  Face(std::istream&amp;amp; is);
+  void render(std::vector &lt;Vector3&gt;&amp;amp;);
+};
+
+</code></pre>
+
+<ul>
+<li>and an accompanying implementation:</li>
+</ul>
+<pre><code>Face::Face(istream&amp;amp; is)
+{
+  char ch1;
+  for (int i = 0; i &lt; 4; i++)
+  {
+    string separator;
+    is &gt;&gt; vertices[i];
+    is &gt;&gt; ch1;
+    is &gt;&gt; textures[i];
+  }
+}
+
+void Face::render()
+{
+  for (int i=0; i&lt;4; i++)
+  {
+    cout &lt;&lt; vertices[i] &lt;&lt; &quot; &quot; &lt;&lt; vertices[i] &lt;&lt; &quot; &quot; &lt;&lt; vertices[i] &lt;&lt; endl;
+  }
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step07" class="ui tab stacked clarity-book segment">
+	     <h2>05: ModelObject</h2>
+<ul>
+<li>Introduce a new class now to represent a full object, using the faces class we have just defined:</li>
+</ul>
+<pre><code>struct ModelObject
+{
+  std::string name;
+  std::vector&lt;Face&gt; faces;
+  std::vector &lt;Vector3&gt; vertices;
+
+  ModelObject();
+  ModelObject(std::istream&amp;amp;);
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>And we can implement this:</li>
+</ul>
+<pre><code>ModelObject::ModelObject()
+{}
+
+ModelObject::ModelObject(istream&amp;amp; is)
+{
+  string indicator;
+  is &gt;&gt; name;
+  bool stillGroup=true;
+  do
+  {
+    is &gt;&gt; indicator;
+    if (indicator == &quot;v&quot;)
+    {
+      vertices.push_back(Vector3(is));
+    }
+    else if (indicator == &quot;f&quot;)
+    {
+      faces.push_back(Face(is));
+    }
+    else if (indicator == &quot;g&quot;)
+    {
+      stillGroup = false;
+    }
+    else
+    {
+      string buf;
+      getline(is, buf);
+    }
+  } while (stillGroup &amp;amp;&amp;amp; ##is.eof());
+  is.putback(indicator[0]);
+}
+
+void ModelObject::render()
+{
+  cout &lt;&lt; &quot; rendering &quot; &lt;&lt; name &lt;&lt; &quot; with &quot; &lt;&lt; faces.size()  &lt;&lt; endl;
+  for (unsigned int i = 0; i &lt; faces.size(); i++)
+  {
+    faces[i].render();
+  }
+}
+</code></pre>
+	  </section>
+	  <section data-tab="step08" class="ui tab stacked clarity-book segment">
+	     <h2>06: Model</h2>
+<ul>
+<li>We now introduce a Model, to hold multiple model objects:</li>
+</ul>
+<pre><code>typedef std::map &lt;std::string, ModelObject&gt;  ModelMap;
+typedef ModelMap::iterator ModelMapIterator;
+
+struct Model
+{
+  ModelMap  modelObjects;
+
+  Model();
+  bool load(std::istream &amp;amp;is);
+  void render();
+};
+</code></pre>
+
+<ul>
+<li>And its implementation:</li>
+</ul>
+<pre><code>Model::Model()
+{
+}
+
+bool Model::load(istream&amp;amp; is)
+{
+  string indicator;
+  is &gt;&gt; indicator;
+  while (##is.eof())
+  {
+    if (indicator == &quot;#&quot;)
+    {
+      string buf;
+      getline(is, buf);
+    }
+    else if (indicator == &quot;g&quot;)
+    {
+      ModelObject a(is);
+      if (modelObjects.find(a.name) == modelObjects.end())
+      {
+        modelObjects[a.name] = a;
+      }
+    }
+    is &gt;&gt; indicator;
+  }
+
+  return true;
+}
+
+void Model::render()
+{
+  for (ModelMapIterator iter = modelObjects.begin(); iter ##= modelObjects.end(); iter++)
+  {
+    iter-&gt;second.render();
+  }
+}
+
+</code></pre>
+	  </section>
+	  <section data-tab="step09" class="ui tab stacked clarity-book segment">
+	     <h2>07: World+Model</h2>
+<ul>
+<li>Introduce a model as a private member of the world class:</li>
+</ul>
+<pre><code>    Model theModel;
+</code></pre>
+
+<ul>
+<li>Along with a public member to load the model:</li>
+</ul>
+<pre><code>    void loadModel (std::string modelName);
+</code></pre>
+
+<ul>
+<li>And we can now implement this load member:</li>
+</ul>
+<pre><code>void World::loadModel (std::string modelName)
+{
+  ifstream inStream;
+  inStream.open(modelName.c_str(), ios::in);
+  if (##inStream.fail())
+  {
+    theModel.load(inStream);
+  }
+}
+</code></pre>
+
+<ul>
+<li>and in World::render() - would should now call render on the model:</li>
+</ul>
+<pre><code>void World::render()
+{
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+  theModel.render();
+
+  glutSwapBuffers();
+}
+</code></pre>
+
+<ul>
+<li>Finally, we can go back to main and load our model:</li>
+</ul>
+<pre><code>int main(int argc, char* argv[])
+{
+  theWorld.setCmdlineParams(&amp;amp;argc, argv);
+  theWorld.initialize(800,600, &quot;First World&quot;);
+
+  theWorld.loadModel(&quot;cube.obj&quot;);
+  theWorld.start();
+  return 0;
+}
+</code></pre>
+
+<p>The program should output to the console something like this:</p>
+<pre><code> rendering default with 0 faces
+ rendering pCube1 with 7 faces
+1 1 1
+2 2 2
+4 4 4
+3 3 3
+3 3 3
+4 4 4
+6 6 6
+5 5 5
+5 5 5
+6 6 6
+8 8 8
+7 7 7
+7 7 7
+8 8 8
+2 2 2
+1 1 1
+2 2 2
+8 8 8
+6 6 6
+4 4 4
+7 7 7
+1 1 1
+3 3 3
+5 5 5
+7 7 7
+1 1 1
+3 3 3
+5 5 5
+</code></pre>
+	  </section>
+	  <section data-tab="step10" class="ui tab stacked clarity-book segment">
+	     <h2>08: Vertices</h2>
+<ul>
+<li>
+<p>The faces are in fact indices into a vertex table - and this vertex table is held in a 'default' group.</p>
+</li>
+<li>
+<p>In order to render to the opengl pipeline, we need a reference to this table.</p>
+</li>
+<li>
+<p>Going back to class ModelObject - we can refactor render to take another ModelObject as a reference - one that will contain the vertex table:</p>
+</li>
+</ul>
+<pre><code>  void render(std::vector &lt;Vector3&gt;&amp;amp;);
+</code></pre>
+
+<ul>
+<li>In our implementation, we can call it the default object - and we can pass it on to the faces render:</li>
+</ul>
+<pre><code>void ModelObject::render(std::vector &lt;Vector3&gt;&amp;amp;defaultTable)
+{
+  cout &lt;&lt; &quot; rendering &quot; &lt;&lt; name &lt;&lt; &quot; with &quot; &lt;&lt; faces.size() &lt;&lt; &quot;faces&quot; &lt;&lt; endl;
+  for (unsigned int i = 0; i &lt; faces.size(); i++)
+  {
+    faces[i].render(defaultTable);
+  }
+</code></pre>
+
+<ul>
+<li>and faces needs to be refactored to take this table:</li>
+</ul>
+<pre><code>  void render(std::vector &lt;Vector3&gt;&amp;amp;);
+</code></pre>
+
+<pre><code>void Face::render(std::vector &lt;Vector3&gt;&amp;amp;defaultTable)
+{
+  for (int i=0; i&lt;4; i++)
+  {
+    cout &lt;&lt; vertices[i] &lt;&lt; &quot; &quot; &lt;&lt; vertices[i] &lt;&lt; &quot; &quot; &lt;&lt; vertices[i] &lt;&lt; endl;
+  }
+}
+</code></pre>
+
+<ul>
+<li>Finally, we need to extract the default object, recover its table, and pass it to the cube when we render it. This can be done simply as follows in model.cpp:</li>
+</ul>
+<pre><code>void Model::render()
+{
+  ModelMapIterator defaultIter = modelObjects.find(&quot;default&quot;);
+  if (defaultIter ##= modelObjects.end())
+  {
+    ModelObject defaultObject(defaultIter-&gt;second);
+    for (ModelMapIterator iter = modelObjects.begin(); iter ##= modelObjects.end(); iter++)
+    {
+      iter-&gt;second.render(defaultObject.vertices);
+    }
+  }
+</code></pre>
+	  </section>
+	  <section data-tab="step11" class="ui tab stacked clarity-book segment">
+	     <h2>09: Rendering</h2>
+<ul>
+<li>We can now see if we are getting the right vertices rendered. Change faces::render as follows:</li>
+</ul>
+<pre><code>void Face::render(std::vector &lt;Vector3&gt;&amp;amp;defaultTable)
+{
+  for (int i=0; i&lt;4; i++)
+  {
+    cout &lt;&lt; defaultTable[vertices[i] - 1].X &lt;&lt; &quot; &quot; &lt;&lt; defaultTable[vertices[i] - 1].Y &lt;&lt; &quot; &quot; &lt;&lt; defaultTable[vertices[i] - 1].Z &lt;&lt; endl;
+  }
+}
+</code></pre>
+
+<ul>
+<li>Which, when executed, should render:</li>
+</ul>
+<pre><code> rendering default with 0faces
+ rendering pCube1 with 7faces
+-5.25187 0 0.717793
+3.83551 0 0.717793
+3.83551 2.49571 0.717793
+-5.25187 2.49571 0.717793
+-5.25187 2.49571 0.717793
+3.83551 2.49571 0.717793
+3.83551 2.49571 -2.09405
+-5.25187 2.49571 -2.09405
+-5.25187 2.49571 -2.09405
+3.83551 2.49571 -2.09405
+3.83551 0 -2.09405
+-5.25187 0 -2.09405
+-5.25187 0 -2.09405
+3.83551 0 -2.09405
+3.83551 0 0.717793
+-5.25187 0 0.717793
+3.83551 0 0.717793
+3.83551 0 -2.09405
+3.83551 2.49571 -2.09405
+3.83551 2.49571 0.717793
+-5.25187 0 -2.09405
+-5.25187 0 0.717793
+-5.25187 2.49571 0.717793
+-5.25187 2.49571 -2.09405
+-5.25187 0 -2.09405
+-5.25187 0 0.717793
+-5.25187 2.49571 0.717793
+-5.25187 2.49571 -2.09405
+</code></pre>
+
+<ul>
+<li>Getting this onto our screen is easy. Extend the above function to render QUADS:</li>
+</ul>
+<pre><code>void Face::render(std::vector &lt;Vector3&gt;&amp;amp;defaultTable)
+{
+  glBegin(GL_QUADS);
+  for (int i=0; i&lt;4; i++)
+  {
+    glVertex3f( defaultTable[vertices[i] - 1].X,
+                defaultTable[vertices[i] - 1].Y,
+                defaultTable[vertices[i] - 1].Z );
+    cout &lt;&lt; defaultTable[vertices[i] - 1].X &lt;&lt; &quot; &quot; &lt;&lt; defaultTable[vertices[i] - 1].Y &lt;&lt; &quot; &quot; &lt;&lt; defaultTable[vertices[i] - 1].Z &lt;&lt; endl;
+  }
+  glEnd();
+}
+</code></pre>
+
+<p><img alt="" src="../img/04.png"></p>
+<ul>
+<li>As we are using perspective projection, our eye co-ordinates are at the origin. So, in World::render(), move the world back 10 units:</li>
+</ul>
+<pre><code>void World::render()
+{
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+  Vector3(0,0,-10).translate();
+  theModel.render();
+
+  glutSwapBuffers();
+}
+</code></pre>
+
+<ul>
+<li>Which should let is see the cube:</li>
+</ul>
+<p><img alt="" src="../img/05.png"></p>
+	  </section>
+	  <section data-tab="step12" class="ui tab stacked clarity-book segment">
+	     <h2>10: Exercises</h2>
+<ul>
+<li>
+<p>Now create a new model just containing a cylinder.</p>
+</li>
+<li>
+<p>Inspect the generated wavefront file. You will notice that there are two types of faces - one containing 4 sets of vertices (Quads) and one containing 3 (Triangles).</p>
+</li>
+<li>
+<p>Implement the necessary modifications to the project to successfully load and render such a model</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>
