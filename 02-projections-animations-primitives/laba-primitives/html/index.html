@@ -1,0 +1,531 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Projections, Animations, Primitives </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Projections, Animations, Primitives</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Setup </a>
+          <a class="item" data-tab="step03"> Points </a>
+          <a class="item" data-tab="step04"> Circle </a>
+          <a class="item" data-tab="step05"> Lines </a>
+          <a class="item" data-tab="step06"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>00: Objectives</h2>
+<ul>
+<li>
+<p>Have practical experience with the point and line openGL primitives</p>
+</li>
+<li>
+<p>Be able to design a model file format that could be rendered using these primitives.</p>
+</li>
+<li>
+<p>Be able to load a model from file</p>
+</li>
+<li>
+<p>Be able to render this model using this initial primitive set.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>01: Setup</h2>
+<ul>
+<li>
+<p>In Eclipse, copy the last lab, and paste it as "lab02a_primitives".</p>
+</li>
+<li>
+<p>Rename the single source file to "primitives.cpp".</p>
+</li>
+<li>
+<p>Completely replace all source with the following:</p>
+</li>
+</ul>
+<pre><code>#include &quot;libopengl.h&quot;
+
+void renderScene(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT);
+
+  ///
+
+  glFlush();
+}
+
+void setupRC()
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+  glColor3f(0.0f, 1.0f, 0.0f);
+
+  glOrtho (-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+}
+
+int main(int argc, char* argv[])
+{
+  glutInit(&amp;amp;argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+  glutCreateWindow(&quot;lab04&quot;);
+  glutInitWindowSize(800,600);
+  glutDisplayFunc(renderScene);
+  setupRC();
+  glutMainLoop();
+
+  return 0;
+}
+</code></pre>
+
+<ul>
+<li>Build and test</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>02: Points</h2>
+<ul>
+<li>Introduce a method points:</li>
+</ul>
+<pre><code>void points()
+{
+}
+</code></pre>
+
+<ul>
+<li>... call this method from renderScene:</li>
+</ul>
+<pre><code>void renderScene(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT);
+
+  points();
+
+  glFlush();
+}
+</code></pre>
+
+<ul>
+<li>Now introduce some simple code to point() function render some points on screen:</li>
+</ul>
+<pre><code>  glBegin( GL_POINTS);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(50.0f, 40.0f, 0.0f);
+    glVertex3f(50.0f, 50.0f, 50.0f);
+  glEnd();
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>Read the following documentation:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glBegin.xml">glBegin</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glEnd.xml">glEnd</a></p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>03: Circle</h2>
+<ul>
+<li>Try another method:</li>
+</ul>
+<pre><code>void circlePoints()
+{
+}
+</code></pre>
+
+<ul>
+<li>Call this from renderScene, and try the following:</li>
+</ul>
+<pre><code>  glBegin( GL_POINTS);
+    float x, y, angle;
+    for (angle = 0.0f; angle &lt;= (2.0f * M_PI); angle += 0.01f)
+    {
+      x = 50.0f * sin(angle);
+      y = 50.0f * cos(angle);
+      glVertex3f(x, y, 0.0f);
+    }
+  glEnd();
+</code></pre>
+
+<ul>
+<li>
+<p>You will need to include math.h for access to M_PI.</p>
+</li>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>The point size can be varied, within certain ranges supported by the opengl implementation. Opengl must be queried to recover these ranges. Define some globals to hold them:</p>
+</li>
+</ul>
+<pre><code>GLfloat sizes[2];
+GLfloat step;
+GLfloat curSize;
+</code></pre>
+
+<ul>
+<li>
+<p>sizes will hold the min and max point size, and step will be the valid increments in this range. We use curSize for our own purposes.</p>
+</li>
+<li>
+<p>In setupRC, query opengl to using for these values using this API calls:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glGet.xml">glGetFloatv</a></p>
+</li>
+<li>
+<p>query for GL_POINT_SIZE_RANGE and GL_POINT_SIZE_GRANULARITY</p>
+</li>
+</ul>
+<pre><code>  glGetFloatv(GL_POINT_SIZE_RANGE,sizes);
+  glGetFloatv(GL_POINT_SIZE_GRANULARITY,&amp;amp;step);
+</code></pre>
+
+<ul>
+<li>Set the curSize to the smallest value:</li>
+</ul>
+<pre><code>  curSize = sizes[0];
+</code></pre>
+
+<ul>
+<li>
+<p>Now we can set the point size in circlePoints() using this api call:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glPointSize.xml">glPointSize</a></p>
+</li>
+</ul>
+<pre><code>  glBegin( GL_POINTS);
+    float x, y, angle;
+    for (angle = 0.0f; angle &lt;= (2.0f * M_PI); angle += 0.01f)
+    {
+      x = 50.0f * sin(angle);
+      y = 50.0f * cos(angle);
+      glPointSize(curSize);
+      glVertex3f(x, y, 0.0f);
+      curSize+=step;
+    }
+  glEnd();
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. Note that the point size does not seem to vary at all.</p>
+</li>
+<li>
+<p>This is because the call to glPointSize must occur before the primitive is signalled with glBegin(GL_POINTS). Refactor the code as follows:</p>
+</li>
+</ul>
+<pre><code>void circlePoints()
+{
+    float x, y, angle;
+    for (angle = 0.0f; angle &lt;= (2.0f * M_PI); angle += 0.01f)
+    {
+      x = 50.0f * sin(angle);
+      y = 50.0f * cos(angle);
+      glPointSize(curSize);
+      glBegin( GL_POINTS);
+        glVertex3f(x, y, 0.0f);
+      glEnd();
+      curSize+=step;
+    }
+}
+</code></pre>
+
+<ul>
+<li>Build and test</li>
+</ul>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>04: Lines</h2>
+<ul>
+<li>
+<p>Review the GL_LINE_LOOP documentation here:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glBegin.xml">glBegin</a></p>
+</li>
+<li>
+<p>Introduce lineLoop function, and call from renderScene as before:</p>
+</li>
+</ul>
+<pre><code>void lineLoop()
+{
+  glBegin( GL_LINE_LOOP);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(50.0f, 50.0f, 0.0f);
+    glVertex3f(50.0f, 100.0f, 0.0f);
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>We can also refactor the circlePoints method, to use lines instead to draw the circle:</p>
+</li>
+</ul>
+<pre><code>void circleLines()
+{
+  glBegin(GL_LINE_LOOP);
+    float x, y, angle;
+    for (angle = 0.0f; angle &lt;= (2.0f * M_PI); angle += 0.01f)
+    {
+      x = 50.0f * sin(angle);
+      y = 50.0f * cos(angle);
+      glVertex3f(x, y, 0.0f);
+    }
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>An example of varying line widths:</p>
+</li>
+</ul>
+<pre><code>void linesWidth()
+{
+  float y;
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  for(y = -90.0f; y &lt; 90.0f; y += 20.0f)
+  {
+    glLineWidth(curSize);
+
+    glBegin(GL_LINES);
+      glVertex2f(-80.0f, y);
+      glVertex2f(80.0f, y);
+    glEnd();
+
+    curSize += 1.0f;
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>This example assumes currSize has been acquired from opengl</p>
+</li>
+<li>
+<p>Finally, a line pattern or stipple can be specified:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glLineStipple.xml">glLineStipple</a></p>
+</li>
+</ul>
+<pre><code>void lineStipple()
+{
+  float y;
+  int factor = 3;
+  short pattern = 0x5555;
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  for(y = -90.0f; y &lt; 90.0f; y += 20.0f)
+  {
+    glLineStipple(factor,pattern);
+
+    glBegin(GL_LINES);
+      glVertex2f(-80.0f, y);
+      glVertex2f(80.0f, y);
+    glEnd();
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and Test. Note that this last example does not produce the desired pattern. Stippling must be explicitly turned on:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glEnable.xml">glEnable</a></p>
+</li>
+</ul>
+<pre><code>  glEnable(GL_LINE_STIPPLE);
+</code></pre>
+
+<ul>
+<li>Insert this in the setupRC function, build and test</li>
+</ul>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>05: Exercises</h2>
+<h2>1. Draw a House</h2>
+<ul>
+<li>Write a program to draw a house something like this:</li>
+</ul>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>
+<p>Use GL_LINE_STRP instead of GL_LINE_LOOP.</p>
+</li>
+<li>
+<p>This drawing essentially consistes of two line loops, one for the house structure and one for the chimney</p>
+</li>
+</ul>
+<h2>2. Define a vertex file format.</h2>
+<ul>
+<li>
+<p>For the house defined in 1, compose a text file that contains the the vertices only + some supporting information. Eg: the following file format:</p>
+</li>
+<li>
+<p>line 1: Number of line loop sequences</p>
+</li>
+<li>
+<p>line 2: Number of vertices in first sequence</p>
+</li>
+<li>
+<p>line 3-n: Vertices for first line loop, 2 per line</p>
+</li>
+<li>
+<p>line n+1: Size second line loop sequence (if any)</p>
+</li>
+<li>
+<p>line n+2: vertices for second sequence, 2 per line</p>
+</li>
+<li>
+<p>...</p>
+</li>
+<li>
+<p>For the house, the file might be:</p>
+</li>
+</ul>
+<pre><code>2
+6
+40 40
+40 90
+70 120
+100 90
+100 40
+40 40
+5
+50 100
+50 120
+60 120
+60 110
+</code></pre>
+
+<ul>
+<li>for some co-ordinate system</li>
+</ul>
+<h2>3. Write a method to load the file defined in 2 and draw the house.</h2>
+<ul>
+<li>
+<p>Some code fragments to get you going:</p>
+</li>
+<li>
+<p>To open a file</p>
+</li>
+</ul>
+<pre><code>  fstream inStream;
+  inStream.open(fileName, ios ::in);  // open the file
+  if(inStream.fail())
+    return;
+</code></pre>
+
+<ul>
+<li>To read in a single integer:</li>
+</ul>
+<pre><code>  int numlines;
+  inStream &gt;&gt; numLines;  
+</code></pre>
+
+<ul>
+<li>To read in two numbers on a line:</li>
+</ul>
+<pre><code>  inStream &gt;&gt; x &gt;&gt; y;  
+</code></pre>
+
+<ul>
+<li>includes needed for above:</li>
+</ul>
+<pre><code>#include &lt;fstream&gt;
+using namespace std;
+</code></pre>
+
+<h2>4.More Models</h2>
+<ul>
+<li>
+<p>Here is another model file defined using the format specified above:</p>
+</li>
+<li>
+<p><a href="../archives/dino.txt">dino.txt</a></p>
+</li>
+<li>
+<p>Inspect this file. Note the max/min coordinates. Change the projection in your program, and attempt to load and draw this.</p>
+</li>
+<li>
+<p>Here is another one:</p>
+</li>
+<li>
+<p><a href="../archives/bighouse.txt">bighouse.txt</a></p>
+</li>
+<li>
+<p>If you look at this one, note that it is using floats instead of ints to define the vertices, and also that the co-ordinate system is quite different - from -1.0 to +1.0. Write a program to load and display this one.</p>
+</li>
+</ul>
+	  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', "UA-49354439-4", 'edeleastar.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>
