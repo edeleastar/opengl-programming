@@ -1,0 +1,458 @@
+ <!DOCTYPE html>
+ <head>
+
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+ 
+   <title> Introduction </title>
+ 
+   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+   <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+   <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+ 
+   <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+   <script src="./style/custom/jquery.address-1.6.min.js"></script>
+   <script src="./style/semantic/javascript/semantic.min.js"></script>
+ 
+   <link rel="stylesheet" href="./style/highlight/highlight.css">
+ 
+   <script src="./style/highlight/highlight.js"></script> 
+   <script>hljs.initHighlightingOnLoad();</script>
+ 
+   <script src="./style/custom/common.js"> </script> 
+   <script src="./style/custom/main.js"> </script> 
+
+</head>
+ 
+ <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../../index.html">Introduction</a></header>
+    <div class="right tab-menu menu">
+          <a class="active item" data-tab="step01"> Objectives </a>
+          <a class="item" data-tab="step02"> Install Eclipse </a>
+          <a class="item" data-tab="step03"> Hello C++ </a>
+          <a class="item" data-tab="step04"> Hello OpenGL </a>
+          <a class="item" data-tab="step05"> Drawing a Square </a>
+          <a class="item" data-tab="step06"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="step01" class="ui active tab stacked clarity-book segment">
+	     <h2>1.0: Objectives</h2>
+<ul>
+<li>
+<p>Install the Eclipse IDE on your workstation</p>
+</li>
+<li>
+<p>Create and run simple C application to test configuration</p>
+</li>
+<li>
+<p>Create a first OpenGL application</p>
+</li>
+<li>
+<p>Draw a square on a blank canvas</p>
+</li>
+<li>
+<p>Experiment with the Eclipse IDE</p>
+</li>
+<li>
+<p>Explore OpenGL documentation</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step02" class="ui tab stacked clarity-book segment">
+	     <h2>1.1: Install Eclipse</h2>
+<ul>
+<li>
+<p>Go to http://www.eclipse.org</p>
+</li>
+<li>
+<p>In the <a href="http://www.eclipse.org/downloads">downloads</a></p>
+</li>
+<li>
+<p>Download and install</p>
+</li>
+<li>
+<p>For OSX and Linux, Eclipse should automatically find the appropriate C/C++ compilers. </p>
+</li>
+<li>
+<p>For windows, eclipse will require an C/C++ compiler to be installed. MinGW is a suitable package: http://www.mingw.org. In particular you should follow these instructions here:</p>
+</li>
+<li>
+<p>http://www.mingw.org/wiki/Getting_Started</p>
+</li>
+<li>
+<p>When you get to running the automated installer, use this command here to make sure you install both the compiler and debugger:</p>
+</li>
+<li>
+<p>mingw-get install gcc gdb</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="step03" class="ui tab stacked clarity-book segment">
+	     <h2>1.2: Hello C++</h2>
+<p>Create a new C++ application, selecting the "Hello World" app from the //File-&gt;New-&gt;C++ Project// menu:</p>
+<p><img alt="" src="../img/00.png"></p>
+<ul>
+<li>This should create an empty project:</li>
+</ul>
+<p><img alt="" src="../img/01.png"></p>
+<ul>
+<li>For Mac, the C++ compiler provided with the system (GNU), should be automatically configured. So just pressing the Build tool (hammer icon) should compile the project:</li>
+</ul>
+<p><img alt="" src="../img/03.png"></p>
+<ul>
+<li>Launch then by selecting Hello.cpp in project navigator, and selecting //Run As-&gt;Local C/C++ Application// from the context menu:</li>
+</ul>
+<p><img alt="" src="../img/04.png"></p>
+<ul>
+<li>Output will be visible in the console in eclipse:</li>
+</ul>
+<p><img alt="" src="../img/06.png"></p>
+<p>Subsequently, to run the application, just press one of the launch icons:</p>
+<p><img alt="" src="../img/05.png"></p>
+<ul>
+<li>For Windows, you may need to explicitly select the MinGW too chain. To this, edit the project properties, select //C++ Build-&gt;Tool Chain Editor// and make sure MinGW is selected:</li>
+</ul>
+<p><img alt="" src="../img/14.png"></p>
+<ul>
+<li>
+<p>Project should build as above.</p>
+</li>
+<li>
+<p>You may wish to experiment with the debugger: a breakpoint can be set by right clicking on the "column 0" in the editor:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/16.png"></p>
+<ul>
+<li>When you then launch the application, use the debug launch tool:</li>
+</ul>
+<p><img alt="" src="../img/17.png"></p>
+<ul>
+<li>Accept to swutch to debug perspective, and you can explore the debugger features as it has paused at the breakpoint:</li>
+</ul>
+<p><img alt="" src="../img/18.png"></p>
+	  </section>
+	  <section data-tab="step04" class="ui tab stacked clarity-book segment">
+	     <h2>1.3: Hello OpenGL</h2>
+<ul>
+<li>
+<p>Create a new Eclipe C/C++ Project and call it HelloOpenGL</p>
+</li>
+<li>
+<p>Insert a new source file in to the project - call it helloopengl.cpp</p>
+</li>
+</ul>
+<p><img alt="" src="../img/07.png"></p>
+<p>Eclipse will generate an empty source file:</p>
+<p><img alt="" src="../img/08.png"></p>
+<ul>
+<li>We need to include the opengl headers. The locations of these headers on different systems varies, so we use directives to distinguish. This code fragment here will work for Mac and Windows:</li>
+</ul>
+<pre><code>#ifdef WIN32
+#include &lt;GL/gl.h&gt;
+#include &lt;GL/glu.h&gt;
+#include &quot;freeglut.h&quot;
+#endif
+
+#ifdef __APPLE__
+#include &lt;OpenGL/gl.h&gt;
+#include &lt;OpenGL/glu.h&gt;
+#include &lt;Glut/glut.h&gt;
+#endif
+</code></pre>
+
+<ul>
+<li>
+<p>Place this into the helloopengl.cpp source</p>
+</li>
+<li>
+<p>Below this insert this starter application:</p>
+</li>
+</ul>
+<pre><code>void renderScene(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT);
+
+  glFlush();
+}
+
+void setupRC(void)
+{
+  glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+}
+
+int main(int argc, char* argv[])
+{
+  glutInit(&amp;amp;argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+  glutCreateWindow(&quot;Hello OpenGL&quot;);
+  glutDisplayFunc(renderScene);
+
+  setupRC();
+
+  glutMainLoop();
+
+  return 0;
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Be Sure to save the file before proceeding.</p>
+</li>
+<li>
+<p>Now attempt to build...</p>
+</li>
+<li>
+<p>Libraries have not been configured, so on Windows you will get the following errors:</p>
+</li>
+</ul>
+<pre><code>**** Internal Builder is used for build               ****
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -ohelloopengl.o ..\helloopengl.cpp
+..\helloopengl.cpp:4:22: freeglut.h: No such file or directory
+..\helloopengl.cpp: In function `int main(int, char**)':
+..\helloopengl.cpp:28: error: `glutInit' was not declared in this scope
+..\helloopengl.cpp:29: error: `GLUT_SINGLE' was not declared in this scope
+..\helloopengl.cpp:29: error: `GLUT_RGBA' was not declared in this scope
+..\helloopengl.cpp:29: error: `glutInitDisplayMode' was not declared in this scope
+..\helloopengl.cpp:30: error: `glutCreateWindow' was not declared in this scope
+..\helloopengl.cpp:31: error: `glutDisplayFunc' was not declared in this scope
+..\helloopengl.cpp:35: error: `glutMainLoop' was not declared in this scope
+..\helloopengl.cpp:28: warning: unused variable 'glutInit'
+..\helloopengl.cpp:29: warning: unused variable 'GLUT_SINGLE'
+..\helloopengl.cpp:29: warning: unused variable 'GLUT_RGBA'
+..\helloopengl.cpp:29: warning: unused variable 'glutInitDisplayMode'
+..\helloopengl.cpp:30: warning: unused variable 'glutCreateWindow'
+..\helloopengl.cpp:31: warning: unused variable 'glutDisplayFunc'
+..\helloopengl.cpp:35: warning: unused variable 'glutMainLoop'
+Build error occurred, build is stopped
+</code></pre>
+
+<ul>
+<li>... and on mac something similiar:</li>
+</ul>
+<pre><code>Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF&quot;helloopengl.d&quot; -MT&quot;helloopengl.d&quot; -o&quot;helloopengl.o&quot; &quot;../helloopengl.cpp&quot;
+Finished building: ../helloopengl.cpp
+
+Building target: HelloOpenGL
+Invoking: MacOS X C++ Linker
+g++  -o &quot;HelloOpenGL&quot;  ./helloopengl.o   
+Undefined symbols:
+  &quot;_glFlush&quot;, referenced from:
+      renderScene()     in helloopengl.o
+  &quot;_glutDisplayFunc&quot;, referenced from:
+      _main in helloopengl.o
+  &quot;_glutInitDisplayMode&quot;, referenced from:
+      _main in helloopengl.o
+  &quot;_glutCreateWindow&quot;, referenced from:
+      _main in helloopengl.o
+  &quot;_glutMainLoop&quot;, referenced from:
+      _main in helloopengl.o
+  &quot;_glutInit&quot;, referenced from:
+      _main in helloopengl.o
+  &quot;_glClearColor&quot;, referenced from:
+      setupRC()    in helloopengl.o
+  &quot;_glClear&quot;, referenced from:
+      renderScene()     in helloopengl.o
+ld: symbol(s) not found
+collect2: ld returned 1 exit status
+make: *** [HelloOpenGL] Error 1
+</code></pre>
+
+<ul>
+<li>As opengl is installed by default on Mac, we just need the appropriate flags to indicate the headders and libraries to link. Select the project in project explorer, from the context menu select //Properties// and then navigate to //C/C++ Build-&gt;MacOS X C++ Linker-&gt;Miscellaneous//</li>
+</ul>
+<p><img alt="" src="../img/09.png"></p>
+<ul>
+<li>
+<p>Enter "-framework GLUT -framework OpenGL" as shown, and press Apply and Ok.</p>
+</li>
+<li>
+<p>Build and execute, and the following window should appear:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/10.png"></p>
+<ul>
+<li>
+<p>On windows, you will need to make sure that the platform SDK is installed. See</p>
+</li>
+<li>
+<p>http://msdn.microsoft.com/en-us/windows/bb980924.aspx</p>
+</li>
+<li>
+<p>The SDK includes OpenGL libraries, but not GLUT. A verion of GLUT is maintained here:</p>
+</li>
+<li>
+<p>http://freeglut.sourceforge.net/</p>
+</li>
+<li>
+<p>This is distributed as a large Visual Studio project. A prebult version, version, suitable for our purposes, is here:</p>
+</li>
+<li>
+<p><a href="../archives/freeglut.zip">freeglut.zip</a></p>
+</li>
+<li>
+<p>Unzip this into a suitable directory, and copy the freeglut.dll into windows/system32.</p>
+</li>
+<li>
+<p>In eclipse, add the freeglut directory to the path for the project:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/11.png"></p>
+<ul>
+<li>And then add the opengl32, glu32 and freeglut libraries to the linker:</li>
+</ul>
+<p><img alt="" src="../img/12.png"></p>
+<ul>
+<li>
+<p>Also place the freeglut folder on the linker search path.</p>
+</li>
+<li>
+<p>Run the application - it should display a blank window:</p>
+</li>
+</ul>
+<p><img alt="" src="../img/13.png"></p>
+	  </section>
+	  <section data-tab="step05" class="ui tab stacked clarity-book segment">
+	     <h2>1.4: Drawing a Square</h2>
+<ul>
+<li>Edit the setupRC method to set a default projection model:</li>
+</ul>
+<pre><code>void setupRC(void)
+{
+  glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+  gluOrtho2D(-100.0, 100.0, -100, 100.0);
+}
+</code></pre>
+
+<ul>
+<li>Now, in renderScene, we can draw a simple rectangle</li>
+</ul>
+<pre><code>void renderScene(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT);
+
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glRectf(-25.0f, 25.0f, 25.0f, -25.0f);
+
+  glFlush();
+}
+</code></pre>
+
+<p><img alt="" src="../img/19.png"></p>
+	  </section>
+	  <section data-tab="step06" class="ui tab stacked clarity-book segment">
+	     <h2>1.4: Exercises</h2>
+<h2>1. Reconfigure the Project Structure</h2>
+<p>Review the two projects you have created, exploring them within eclipse:</p>
+<p><img alt="" src="../img/20.png"></p>
+<p>and on the file system:</p>
+<p><img alt="" src="../img/21.png"></p>
+<p>Refactor the opengl project such that the source is in a src subdirectory, like the c++ application. To do this, you will need to:
+- Create a "source directory" called src in eclipse</p>
+<ul>
+<li>
+<p>Move the helloopengl.cpp file in there</p>
+</li>
+<li>
+<p>clean the project, and also (perhaps) manualy delete the "debug" folder from within explorer/finder.</p>
+</li>
+</ul>
+<p>Your objective is to have a project structure like this:</p>
+<p><img alt="" src="../img/22.png"></p>
+<h2>2. Introduce a utilities project</h2>
+<p>Create a new project to contain some utility classes. Call the project "utils". 
+It should initially contain a single leader file "libopengl.h". Put the includes from the existing open gl source into into it:</p>
+<pre><code>#ifdef WIN32
+#include &lt;windows.h&gt;
+#include &lt;gl\glu.h&gt;
+#include &quot;glut.h&quot;
+#endif
+
+#ifdef __APPLE__
+#include &lt;OpenGL/gl.h&gt;
+#include &lt;OpenGL/glu.h&gt;
+#include &lt;Glut/glut.h&gt;
+#endif
+</code></pre>
+
+<p>Then replace these lines in your C++ programe with:</p>
+<pre><code>#include &quot;libopengl.h&quot; 
+</code></pre>
+
+<p>There are many ways of doing this within eclipse. Most involve exiting the project properties, and exploring the project paths for the build. The following screen here gives the game away...</p>
+<p><img alt="" src="../img/23.png"></p>
+<h2>3. Explore the OpenGL API</h2>
+<ul>
+<li>
+<p>Draw Several Rectangles, in different locations, in different colours</p>
+</li>
+<li>
+<p>Change the co-ordinate sytem so that the screen has different virtual dimensions</p>
+</li>
+<li>
+<p>Explore what happens when the screen is resized.</p>
+</li>
+<li>
+<p>Browse the following documentation:</p>
+</li>
+<li>
+<p>gl</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glClear.xml">glClear</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glClearColor.xml">glClearColor</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glRect.xml">glRect</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glFlush.xml">glFlush</a></p>
+</li>
+<li>
+<p>glu</p>
+</li>
+<li>
+<p><a href="gluOrtho2D|http://www.opengl.org/sdk/docs/man/xhtml/gluOrtho2D.xml">gluOrthd3D</a></p>
+</li>
+<li>
+<p>glut</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/resources/libraries/glut/spec3/node10.html#SECTION00031000000000000000">glutInit</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node12.html#SECTION00033000000000000000">glutInitDisplayMode</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node16.html#SECTION00051000000000000000">glutCreateWindow</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node46.html#SECTION00081000000000000000">glutDisplayFunc</a></p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node14.html#SECTION00041000000000000000">glutMainLoop</a></p>
+</li>
+</ul>
+	  </section>
+	<br>
+	<div class="ui fixed bottom borderless menu">'
+	  <div class="ui small item"> 
+	  <p id="footertext">
+	  Prepared by  Eamonn de leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+	   <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+	     target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+	   </a>
+	   </p>
+	  </div>
+	</div>
+
+ </body>
+ </html>
