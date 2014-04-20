@@ -1,0 +1,377 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+   
+     <title> Lab-06-B </title>
+   
+     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+     <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+     <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+   
+     <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+     <script src="./style/custom/jquery.address-1.6.min.js"></script>
+     <script src="./style/semantic/javascript/semantic.min.js"></script>
+   
+     <link rel="stylesheet" href="./style/highlight/school_book.css">
+     <script src="./style/highlight/highlight.pack.js"></script> 
+     <script>hljs.initHighlightingOnLoad();</script>
+   
+     <script src="./style/custom/common.js"> </script> 
+     <script src="./style/custom/main.js"> </script> 
+  </head>
+  <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../index.html">Perspectives & Models</a></header>
+    <div class="right tab-menu menu">
+          <a class="item" data-tab="Lab-06-B"> Lab-06-B </a>
+          <a class="item" data-tab="01"> 01 </a>
+          <a class="item" data-tab="02"> 02 </a>
+          <a class="item" data-tab="03"> 03 </a>
+          <a class="item" data-tab="04"> 04 </a>
+          <a class="item" data-tab="Exercises"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="Lab-06-B" class="ui tab stacked moodle-book segment">
+	     <h1>Objectives</h1>
+<ul>
+<li>Explore the  Perspective projection in the context of the atom/electon animation</li>
+<li>Develop a more detailed knowledge of the gluPerspective function</li>
+<li>Rework the atom/electron animation into a simple sun/earth/moon rotation sequence</li>
+<li>Understand how the entire world could be rotated/translated to simulate the flight of a camera through the model</li>
+<li>Explore further the model classes devised in assignment 1 solution</li>
+</ul>
+	  </section>
+	  <section data-tab="01" class="ui tab stacked moodle-book segment">
+	     <h1>Setup</h1>
+<ul>
+<li>Duplicate the lab05b_transformations project - and call the new project lab06b_perspective</li>
+<li>Build and test</li>
+</ul>
+	  </section>
+	  <section data-tab="02" class="ui tab stacked moodle-book segment">
+	     <h1>Perspective</h1>
+<ul>
+<li>
+<p>We will switch the projection from Orthographic to Perspective:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/gluPerspective.xml">gluPerspective</a></p>
+</li>
+<li>
+<p>Modify setupRC to use this:</p>
+</li>
+</ul>
+<pre><code>  //glOrtho (-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+  gluPerspective(60.0f, 1, 50.0, 400.0);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>You will notice that you seem to be in the nucleus, with the electrons orbiting around you.</p>
+</li>
+<li>
+<p>This is because gluPerspective sets the initial eye co-ordinates at the origin. To get a full view, we can translate the entire world out along the Z axis. Put this line at the end of setupRC:</p>
+</li>
+</ul>
+<pre><code>  glTranslatef(0.0f, 0.0f, -200.0f);
+</code></pre>
+
+<ul>
+<li>Build and test.</li>
+</ul>
+<h2>Exercise 1: gluPerspective Parameters</h2>
+<ul>
+<li>
+<p>Experiment with the parameters to gluPerspective - trying different values.</p>
+</li>
+<li>
+<p>Near and far are easy understand, experiment with larger near and smaller far</p>
+</li>
+<li>
+<p>Fovy and aspect should be experimented with independently.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="03" class="ui tab stacked moodle-book segment">
+	     <h1>Camera</h1>
+<ul>
+<li>We can use the technique of translating the entire image into view in setupRC:</li>
+</ul>
+<pre><code>  glTranslatef(0.0f, 0.0f, -200.0f);
+</code></pre>
+
+<ul>
+<li>
+<p>...to dynamically change our view of the model, while the animation is in progress.</p>
+</li>
+<li>
+<p>We do this by intercepting special keys, and changing the transformation depending on some increments based on which key was pressed.</p>
+</li>
+<li>
+<p>First, register a callback special keys in main:</p>
+</li>
+</ul>
+<pre><code>  glutSpecialFunc(specialKeys);
+</code></pre>
+
+<ul>
+<li>Implement this method:</li>
+</ul>
+<pre><code>void specialKeys(int key, int x, int y)
+{
+}
+</code></pre>
+
+<ul>
+<li>lets intercept the left/right arrow keys, and set the variable left or right to +5 or -5 depending on which was pressed:</li>
+</ul>
+<pre><code>  int left=0, right=0;
+
+  left  = (key == GLUT_KEY_LEFT)?     5 : 0;
+  right = (key == GLUT_KEY_RIGHT)?   -5 : 0;
+</code></pre>
+
+<ul>
+<li>All we have to do now is translate the entire scene along the x axis by this increment:</li>
+</ul>
+<pre><code>  glTranslatef(left+right, 0.0f, 0.0f);
+  glutPostRedisplay();
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. You should have the impression that you are swiveling a camera left or right.</p>
+</li>
+<li>
+<p>Doing the same for up/down, and also for in/out:</p>
+</li>
+</ul>
+<pre><code>  int up=0, down=0;
+  int left=0, right=0;
+  int in=0, out=0;
+
+  up    = (key == GLUT_KEY_UP)?      -5 : 0;
+  down  = (key == GLUT_KEY_DOWN)?     5 : 0;
+  left  = (key == GLUT_KEY_LEFT)?     5 : 0;
+  right = (key == GLUT_KEY_RIGHT)?   -5 : 0;
+  in    = (key == 9)?       5 : 0;   // tab
+  out   = (key == 32)?      -5 : 0;  // space
+
+  glTranslatef(left+right, up+down, in+out);
+  glutPostRedisplay();
+</code></pre>
+
+<ul>
+<li>
+<p>In the above example, we are using tab/space for moving towards/away from the scene.</p>
+</li>
+<li>
+<p>Build and test</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="04" class="ui tab stacked moodle-book segment">
+	     <h1>Solar System</h1>
+<ul>
+<li>
+<p>We can no construct an alternative to the atom simulation, based on much the same code.</p>
+</li>
+<li>
+<p>We want to present an animation of the earth rotating around the sun, and then the moon rotating around the earth.</p>
+</li>
+<li>
+<p>First, a method to render the earth/moon:</p>
+</li>
+</ul>
+<pre><code>void renderEarthMoon(int moonAngle)
+{
+  glPushMatrix();
+    Color::Blue.render();
+    glutSolidSphere(15, 15, 15);
+
+    Color::Green.render();
+    Vector3::UnitY.rotate(moonAngle);
+    Vector3(30.0f, 0.0f, 0.0f).translate();
+    glutSolidSphere(6.0f, 30, 17);
+  glPopMatrix();
+}
+</code></pre>
+
+<ul>
+<li>Introduce an alternative to the current renderScene method - renderSolarSystem:</li>
+</ul>
+<pre><code>void renderSolarSystem(void)
+{
+  static int moonRot = 0;
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+    renderEarthMoon(moonRot);
+  glPopMatrix();
+
+  moonRot  = (moonRot + 10) % 360;
+
+  glutSwapBuffers();
+}
+</code></pre>
+
+<ul>
+<li>In main, change the display function to use this function:</li>
+</ul>
+<pre><code>  glutDisplayFunc(renderSolarSystem);
+</code></pre>
+
+<ul>
+<li>Build and test. The application should display a singe blue sphere with a green sphere in orbit around it:</li>
+</ul>
+<p><img alt="" src="img/00.png"></p>
+<ul>
+<li>(You may need to comment out the translate call in setupRC()</li>
+</ul>
+<pre><code>  //glTranslatef(0.0f, 0.0f, -200.0f);
+</code></pre>
+
+<ul>
+<li>We will now push earth our 100 units from the origin. In renderEarthMoon(), introduce the necessary translation before the rendering of the earth:</li>
+</ul>
+<pre><code>  //...
+    Vector3(100,0,0).translate();
+  //...
+</code></pre>
+
+<ul>
+<li>Our simulation now looks like this:</li>
+</ul>
+<p><img alt="" src="img/01.png"></p>
+<ul>
+<li>Lets draw the sun before we render the earth and moon:</li>
+</ul>
+<pre><code>  //...
+    Color::Yellow.render();
+    glutSolidSphere(15.0f, 30, 17);
+  //...
+</code></pre>
+
+<p><img alt="" src="img/02.png"></p>
+<ul>
+<li>
+<p>Finally, we need to put the earth in orbit around the sun.</p>
+</li>
+<li>
+<p>First, change renderEarthMoon to take an angle increment for the earth:</p>
+</li>
+</ul>
+<pre><code>void renderEarthMoon(int earthAngle, int moonAngle)
+{
+</code></pre>
+
+<ul>
+<li>..and rotate the earth by this angle:</li>
+</ul>
+<pre><code>    Vector3::UnitY.rotate(earthAngle);
+</code></pre>
+
+<ul>
+<li>We now need to introduce a variable in renderSolarSystem to manage this rotation:</li>
+</ul>
+<pre><code>  static int earthRot = 0;
+  //...
+  earthRot = (earthRot + 5) % 360;
+</code></pre>
+
+<ul>
+<li>... and pass this value to the renderEarthMoon function:</li>
+</ul>
+<pre><code>    renderEarthMoon(earthRot, moonRot);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Your final version might look like this:</p>
+</li>
+<li>
+<p>[[projection.cpp]]</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="Exercises" class="ui tab stacked moodle-book segment">
+	     <h1>Exercises</h1>
+<h2>1. Camera Experiments</h2>
+<ul>
+<li>
+<p>Currently, when you zoom out to far, or in too near, the scene disappears from view.</p>
+</li>
+<li>
+<p>Experiment with changes to gluPerspectives second two parameters to have the scene keep the scene in view</p>
+</li>
+</ul>
+<h2>2. Second Planet</h2>
+<ul>
+<li>Try to create another planet, with two moons, in a different orbit.</li>
+</ul>
+<h2>3. Model Classes</h2>
+<ul>
+<li>
+<p><a href="archives/lab06_assignment1_solution.zip">lab06_assignment1_solution.zip</a></p>
+</li>
+<li>
+<p>Create a new project, and incorporate all of these sources. Build and test.</p>
+</li>
+<li>
+<p>Develop a set of classes to solar system simulation devised in this lab, but based on the model classes in assignment 1 Solution.</p>
+</li>
+<li>
+<p>Candidate classes:</p>
+</li>
+<li>
+<p>Sun</p>
+</li>
+<li>
+<p>Planet</p>
+</li>
+<li>
+<p>Moon</p>
+</li>
+<li>
+<p>Develop a simple extension to the model file formal to enable characteristics of the atom(s) to be loaded from our mode file.</p>
+</li>
+</ul>
+	  </section>
+  <div class="ui fixed bottom borderless menu">'
+    <div class="ui small item"> 
+    <p id="footertext">
+    Prepared by  Eamonn de Leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+     <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+       target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+     </a>
+     </p>
+    </div>
+  </div>   
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-49703418-6']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>  </body>
+ </html>

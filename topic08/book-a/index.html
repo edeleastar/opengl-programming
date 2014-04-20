@@ -1,0 +1,500 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+   
+     <title> Lab-08-A </title>
+   
+     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+     <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+     <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+   
+     <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+     <script src="./style/custom/jquery.address-1.6.min.js"></script>
+     <script src="./style/semantic/javascript/semantic.min.js"></script>
+   
+     <link rel="stylesheet" href="./style/highlight/school_book.css">
+     <script src="./style/highlight/highlight.pack.js"></script> 
+     <script>hljs.initHighlightingOnLoad();</script>
+   
+     <script src="./style/custom/common.js"> </script> 
+     <script src="./style/custom/main.js"> </script> 
+  </head>
+  <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../index.html">STL & Simple Physics</a></header>
+    <div class="right tab-menu menu">
+          <a class="item" data-tab="Lab-08-A"> Lab-08-A </a>
+          <a class="item" data-tab="01"> 01 </a>
+          <a class="item" data-tab="02"> 02 </a>
+          <a class="item" data-tab="03"> 03 </a>
+          <a class="item" data-tab="04"> 04 </a>
+          <a class="item" data-tab="05"> 05 </a>
+          <a class="item" data-tab="06"> 06 </a>
+          <a class="item" data-tab="Exercises"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="Lab-08-A" class="ui tab stacked moodle-book segment">
+	     <h1>Objectives</h1>
+<ul>
+<li>Explore the primary stl sequences, associations and adapters</li>
+<li>Examine the implications of using inheritance and virtual functions with these containers</li>
+<li>Gain an understanding of the memory management implications of storing references in containers</li>
+<li>Use a simple auto pointer implementation to ease the burden of managing memory</li>
+<li>Explore the ptr_container library, and gain an understanding of how it manages memory in this context.</li>
+</ul>
+	  </section>
+	  <section data-tab="01" class="ui tab stacked moodle-book segment">
+	     <h1>Setup</h1>
+<ul>
+<li>
+<p>Create a new project called lab08a_stl</p>
+</li>
+<li>
+<p>Make sure the <a href="http://www.boost.org/">boost library</a></p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="02" class="ui tab stacked moodle-book segment">
+	     <h1>STL</h1>
+<ul>
+<li>
+<p>In eclipse, create a folder in the src folder of the project called "sequences".</p>
+</li>
+<li>
+<p>Into this folder incorporate the following source files:</p>
+</li>
+<li>
+<p><a href="archives/list.cpp">list.cpp</a></p>
+</li>
+<li>
+<p><a href="archives/vector.cpp">vector.cpp</a></p>
+</li>
+<li>
+<p>Create another folder call "associations", to incorporate these files:</p>
+</li>
+<li>
+<p><a href="archives/set.cpp">set.cpp</a></p>
+</li>
+<li>
+<p><a href="archives/map.cpp">map.cpp</a></p>
+</li>
+<li>
+<p>Create folder called "adapters":</p>
+</li>
+<li>
+<p><a href="archives/deque.cpp">deque.cpp</a></p>
+</li>
+<li>
+<p><a href="archives/stack.cpp">stack.cpp</a></p>
+</li>
+<li>
+<p><a href="archives/queue.cpp">queue.cpp</a></p>
+</li>
+<li>
+<p><a href="archives/priorityqueue.cpp">priorityqueue.cpp</a></p>
+</li>
+<li>
+<p>Create a folder called "iterators" containing:</p>
+</li>
+<li>
+<p><a href="archives/iterators.cpp">iterators.cpp</a></p>
+</li>
+<li>
+<p>Now create a folder called "utils", incorporating:</p>
+</li>
+<li>
+<p><a href="archives/util.h">util.h</a></p>
+</li>
+<li>
+<p>You project structure should start to look something like this:</p>
+</li>
+</ul>
+<p><img alt="" src="img/01.png"></p>
+<ul>
+<li>
+<p>incorporate the following main program into the "src" folder itself:</p>
+</li>
+<li>
+<p><a href="archives/main.cpp">main.cpp</a></p>
+</li>
+<li>
+<p>In order to compile, you will need to place "util" on the include path.</p>
+</li>
+<li>
+<p>Build and test.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="03" class="ui tab stacked moodle-book segment">
+	     <h1>Shape Classes</h1>
+<ul>
+<li>
+<p>Create a new folder called "shapes", and incorporate the following classes (all just headder files):</p>
+</li>
+<li>
+<p><a href="archives/point.h">point.h</a></p>
+</li>
+<li>
+<p><a href="archives/shape.h">shape.h</a></p>
+</li>
+<li>
+<p><a href="archives/ellipse.h">ellipse.h</a></p>
+</li>
+<li>
+<p><a href="archives/rectangle.h">rectangle.h</a></p>
+</li>
+<li>
+<p>In the same folder, introduce this source file:</p>
+</li>
+<li>
+<p><a href="archives/poly.cpp">poly.cpp</a></p>
+</li>
+<li>
+<p>Adjust main.cpp to just call the function in this file only:</p>
+</li>
+</ul>
+<pre><code>#include &quot;util.h&quot;
+
+void vectest();
+void listtest();
+void dequetest();
+void settest();
+void maptest();
+void stacktest();
+void queuetest();
+void priorityqueuetest();
+void iteratortest();
+
+void polytest1();
+
+int main()
+{
+/*  vectest();
+  listtest();
+  dequetest();
+  settest();
+  maptest();
+  stacktest();
+  queuetest();
+  priorityqueuetest();
+  iteratortest();*/
+
+  polytest1();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Can you explain the output?</p>
+</li>
+<li>
+<p>Write a new function - polytest2(), such that shapes is an array of pointers.</p>
+</li>
+</ul>
+<pre><code>void polytest2()
+{
+  Shape* shapes[2];
+  shapes[0] = new Ellipse(Point (1,1), 10);
+  shapes[1] = new Rectangle(Point(2,2), 20, 10);
+
+  for (int i=0; i&lt;2; i++)
+  {
+    shapes[i]-&gt;draw();
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Run the program again - what is the difference in the output?</p>
+</li>
+<li>
+<p>The for loop can be rewritten using the boost foreach (include 'util.h' to get the definition):</p>
+</li>
+</ul>
+<pre><code>  foreach (Shape *s, shapes)
+  {
+    s-&gt;draw();
+  }
+</code></pre>
+	  </section>
+	  <section data-tab="04" class="ui tab stacked moodle-book segment">
+	     <h1>list of shapes</h1>
+<ul>
+<li>Introduce the following function:</li>
+</ul>
+<pre><code>void polytest3()
+{
+  Ellipse   e(Point (1,1), 10);
+  Rectangle r(Point(2,2), 20, 10);
+
+  list &lt;Shape&gt; shapeList;
+
+  shapeList.push_back(e);
+  shapeList.push_back(r);
+
+  foreach (Shape &amp;amp;s, shapeList)
+  {
+    s.draw();
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. Can you explain the result?</p>
+</li>
+<li>
+<p>Change Shape::draw() to be a pure virtual:</p>
+</li>
+</ul>
+<pre><code>  virtual void draw()=0;
+</code></pre>
+
+<ul>
+<li>
+<p>Rebuild and test. Can you explain the error messages?</p>
+</li>
+<li>
+<p>Try the following:</p>
+</li>
+</ul>
+<pre><code>  list &lt;Shape*&gt; shapeList;
+
+  shapeList.push_back(new Ellipse(Point (1,1), 10));
+  shapeList.push_back(new Rectangle(Point(2,2), 20, 10));
+
+  foreach (Shape *s, shapeList)
+  {
+    s-&gt;draw();
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>Notice that the objects are never deleted. Introduce a the code (perhaps using the foreach) to delete all of the shapes form the list.</p>
+</li>
+<li>
+<p>Consider introducing a subclass of list - which would have a destructor which could carry out this cleanup.</p>
+</li>
+<li>
+<p>This is a potential class here:</p>
+</li>
+</ul>
+<pre><code>template &lt;typename T&gt;
+struct mylist : public list&lt;T&gt;
+{
+  mylist()
+  {}
+
+  virtual mylist()
+  {
+    foreach (T &amp;amp;s, *this)
+    {
+     delete s;
+    }
+  }
+};
+</code></pre>
+
+<ul>
+<li>Verify that cleanup happens with this example here:</li>
+</ul>
+<pre><code>  mylist &lt;Shape*&gt; shapeList;
+
+  shapeList.push_back(new Ellipse(Point (1,1), 10));
+  shapeList.push_back(new Rectangle(Point(2,2), 20, 10));
+
+  foreach (Shape *s, shapeList)
+  {
+    s-&gt;draw();
+  }
+</code></pre>
+	  </section>
+	  <section data-tab="05" class="ui tab stacked moodle-book segment">
+	     <h1>Ref2</h1>
+<ul>
+<li>Introduce the following smart pointer class into your project:</li>
+</ul>
+<pre><code>#pragma once
+
+template &lt; class T &gt;
+class Ref2
+  {
+  public:
+    Ref2(const T &amp;amp;s)                           {KillData = true;  t = s.clone();}
+    Ref2(T *s)                                 {KillData = false; t = s;}
+    Ref2(const Ref2 &lt; T &gt; &amp;amp;r)                  {KillData = true;
+                                                t = r.t?r.t-&gt;clone():NULL;}
+    Ref2()                                    {if (t &amp;amp;&amp;amp; KillData) delete t;}
+    Ref2&amp;amp; operator= (const Ref2 &lt; T &gt; &amp;amp; r)     {if (t &amp;amp;&amp;amp; KillData) delete t;
+                                                KillData = true;
+                                                t = r.t?r.t-&gt;clone():NULL;
+                                                return *this; }
+    T* operator-&gt;() const                      {return t;}
+    int operator&lt; (const Ref2 &lt; T &gt; &amp;amp; r) const {return t?r.t?(*t) &lt; (*r.t):false:true;}
+    operator T&amp;amp;()   const                      {return *t;}
+    operator T*()   const                      {return t;}
+    T&amp;amp; operator*()  const                      {return *t;}
+  protected:
+    T *t;
+  private:
+    bool KillData;
+  };
+</code></pre>
+
+<ul>
+<li>We can reformulate the shape examples to use this class:</li>
+</ul>
+<pre><code>  list &lt;Ref2 &lt;Shape&gt; &gt; shapeList;
+  shapeList.push_back(Ellipse(Point (1,1), 10));
+  shapeList.push_back(Rectangle(Point(2,2), 20, 10));
+
+  foreach (Shape *s, shapeList)
+  {
+    s-&gt;draw();
+  }
+</code></pre>
+
+<ul>
+<li>
+<p>Compilation will fail - as this template requires a "clone" method in the shape classes.</p>
+</li>
+<li>
+<p>Introduce these now:</p>
+</li>
+</ul>
+<pre><code>  // Shape...
+  virtual Shape* clone() const
+  {return 0;};
+
+  //... Ellipse...
+  Shape* clone() const
+  {
+   return new Ellipse(origin, radius);
+  }
+
+  //... Rectangle..
+  Shape* clone() const
+  {
+    return new Rectangle(origin, width, height);
+  }
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test</p>
+</li>
+<li>
+<p>Can you account for all of the objects being created/destroyed?</p>
+</li>
+<li>
+<p>What happens if the following is introduced:</p>
+</li>
+</ul>
+<pre><code>  static Ellipse persistentEllipse(Point(20,20), 22);
+  shapeList.push_back(&amp;amp;persistentEllipse);
+</code></pre>
+
+<ul>
+<li>Now try this one:</li>
+</ul>
+<pre><code>  list &lt;Ref2 &lt;Shape&gt; &gt; shapeList;
+  shapeList.push_back(new Ellipse(Point(20,20), 22));
+</code></pre>
+
+<ul>
+<li>Do you observe any differences?</li>
+</ul>
+	  </section>
+	  <section data-tab="06" class="ui tab stacked moodle-book segment">
+	     <h1>ptr_container</h1>
+<ul>
+<li>Now include the ptr_conainer library into your test code:</li>
+</ul>
+<pre><code>#include &lt;boost/ptr_container/ptr_list.hpp&gt;
+using namespace boost;
+</code></pre>
+
+<ul>
+<li>Now try the following:</li>
+</ul>
+<pre><code>  ptr_list &lt;Shape&gt;  shapeList;
+
+  shapeList.push_back(new Ellipse(Point (1,1), 10));
+  shapeList.push_back(new Rectangle(Point(2,2), 20, 10));
+
+  ptr_list &lt;Shape&gt;::iterator i;
+  for (i=shapeList.begin(); i##=shapeList.end(); i++)
+    i-&gt;draw();
+
+  foreach (Shape &amp;amp;s, shapeList)
+  {
+    s.draw();
+  }
+</code></pre>
+
+<ul>
+<li>Remove all the other code - so you can just track the objects within this fragment only.</li>
+</ul>
+	  </section>
+	  <section data-tab="Exercises" class="ui tab stacked moodle-book segment">
+	     <h1>Exercises</h1>
+<h2>STL Lab Archive</h2>
+<ul>
+<li><a href="archives/stl.zip">stl.zip</a></li>
+</ul>
+<h2>Exercise 1: ptr_container</h2>
+<ul>
+<li>
+<p>Rework the last lab to use</p>
+</li>
+<li>
+<p>ptr_container library</p>
+</li>
+<li>
+<p>boost foreach loops.</p>
+</li>
+</ul>
+<h2>Exercise 2: Camera</h2>
+<ul>
+<li>In earlier labs, we implemented a rudimentary mechanism for navigation a scene. Propose and implement a design whereby this is modeled as a Camera abstraction - that is placed within a scene and can be moved around via some keybaord sequences</li>
+</ul>
+	  </section>
+  <div class="ui fixed bottom borderless menu">'
+    <div class="ui small item"> 
+    <p id="footertext">
+    Prepared by  Eamonn de Leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+     <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+       target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+     </a>
+     </p>
+    </div>
+  </div>   
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-49703418-6']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>  </body>
+ </html>

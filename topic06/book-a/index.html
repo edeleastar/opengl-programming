@@ -1,0 +1,301 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+   
+     <title> Lab-06-A </title>
+   
+     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+     <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+     <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+   
+     <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+     <script src="./style/custom/jquery.address-1.6.min.js"></script>
+     <script src="./style/semantic/javascript/semantic.min.js"></script>
+   
+     <link rel="stylesheet" href="./style/highlight/school_book.css">
+     <script src="./style/highlight/highlight.pack.js"></script> 
+     <script>hljs.initHighlightingOnLoad();</script>
+   
+     <script src="./style/custom/common.js"> </script> 
+     <script src="./style/custom/main.js"> </script> 
+  </head>
+  <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../index.html">Perspectives & Models</a></header>
+    <div class="right tab-menu menu">
+          <a class="item" data-tab="Lab-06-A"> Lab-06-A </a>
+          <a class="item" data-tab="01"> 01 </a>
+          <a class="item" data-tab="02"> 02 </a>
+          <a class="item" data-tab="03"> 03 </a>
+          <a class="item" data-tab="Exercises"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="Lab-06-A" class="ui tab stacked moodle-book segment">
+	     <h1>Objectives</h1>
+<ul>
+<li>Explore the rendering of quads, quadstrips and polygons.</li>
+<li>Perform some simple experiments with the scissors buffer</li>
+</ul>
+	  </section>
+	  <section data-tab="01" class="ui tab stacked moodle-book segment">
+	     <h1>Setup</h1>
+<ul>
+<li>
+<p>Create a new lab09 project as usual.</p>
+</li>
+<li>
+<p>Use the following setRC:</p>
+</li>
+</ul>
+<pre><code>  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glColor3f(0.0f, 1.0f, 0.0f);
+  glOrtho (-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+
+  glPolygonMode(GL_FRONT,GL_LINE);
+  glPolygonMode(GL_BACK, GL_LINE);
+  glShadeModel(GL_FLAT);
+  glEnable(GL_DEPTH_TEST);
+</code></pre>
+
+<ul>
+<li>Define a function for drawing a QUAD - essentially a four sided polygon:</li>
+</ul>
+<pre><code>void drawQuad()
+{
+  glBegin(GL_QUADS);
+    glVertex3f(-50.0f,  0.0f, 0.0f);
+    glVertex3f( 0.0f,  50.0f, 0.0f);
+    glVertex3f( 50.0f,  0.0f, 0.0f);
+    glVertex3f( 0.0f, -50.0f, 0.0f);
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>Also build a quad strip:</li>
+</ul>
+<pre><code>void drawQuadStrips()
+{
+  glBegin(GL_QUAD_STRIP);
+    glVertex3f(-50.0f,  -50.0f, 0.0f);
+    glVertex3f( -50.0f,  50.0f, 0.0f);
+    glVertex3f( 0.0f, -50.0f, 0.0f);
+    glVertex3f( 0.0f,  50.0f, 0.0f);
+    glVertex3f( 50.0f, -50.0f, 0.0f);
+    glVertex3f( 50.0f, 50.0f, 0.0f);
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>and a general Polygon:</li>
+</ul>
+<pre><code>void drawPolygon()
+{
+  glBegin(GL_POLYGON);
+    glVertex3f(-50.0f,  50.0f, 0.0f);
+    glVertex3f( 20.0f,  50.0f, 0.0f);
+    glVertex3f( 50.0f,  30.0f, 0.0f);
+    glVertex3f( 50.0f, -50.0f, 0.0f);
+    glVertex3f(-50.0f, -50.0f, 0.0f);
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>Build and run these individually</li>
+</ul>
+	  </section>
+	  <section data-tab="02" class="ui tab stacked moodle-book segment">
+	     <h1>Edges</h1>
+<ul>
+<li>The following method draws a four pointed star:</li>
+</ul>
+<pre><code>void star()
+{
+  glBegin(GL_TRIANGLES);
+
+    glVertex2f(-20.0f, 0.0f);
+    glVertex2f(20.0f, 0.0f);
+    glVertex2f(0.0f, 40.0f);
+
+    glVertex2f(-20.0f,0.0f);
+    glVertex2f(-60.0f,-20.0f);
+    glVertex2f(-20.0f,-40.0f);
+
+    glVertex2f(-20.0f,-40.0f);
+    glVertex2f(0.0f, -80.0f);
+    glVertex2f(20.0f, -40.0f);
+
+    glVertex2f(20.0f, -40.0f);
+    glVertex2f(60.0f, -20.0f);
+    glVertex2f(20.0f, 0.0f);
+
+    glVertex2f(-20.0f, 0.0f);
+    glVertex2f(-20.0f,-40.0f);
+    glVertex2f(20.0f, 0.0f);
+
+    glVertex2f(-20.0f,-40.0f);
+    glVertex2f(20.0f, -40.0f);
+    glVertex2f(20.0f, 0.0f);
+
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>If we set polygonmode to fill</li>
+</ul>
+<pre><code>  glPolygonMode(GL_FRONT,GL_FILL);
+  glPolygonMode(GL_BACK, GL_FILL);
+</code></pre>
+
+<ul>
+<li>then we see this:</li>
+</ul>
+<p><img alt="" src="img/00.png"></p>
+<ul>
+<li>Resetting to line mode, however, produces this:</li>
+</ul>
+<p><img alt="" src="img/01.png"></p>
+<ul>
+<li>
+<p>As you can see, the edges are showing. Wether these edges are displayed or not can be controlled by this api call:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glEdgeFlag.xml">glEdgeFlag</a></p>
+</li>
+<li>
+<p>Try this version:</p>
+</li>
+</ul>
+<pre><code>void starWithoutEdges()
+{
+  glBegin(GL_TRIANGLES);
+
+    glEdgeFlag(GL_FALSE);
+    glVertex2f(-20.0f, 0.0f);
+    glEdgeFlag(GL_TRUE);
+    glVertex2f(20.0f, 0.0f);
+    glVertex2f(0.0f, 40.0f);
+
+    glVertex2f(-20.0f,0.0f);
+    glVertex2f(-60.0f,-20.0f);
+    glEdgeFlag(GL_FALSE);
+    glVertex2f(-20.0f,-40.0f);
+    glEdgeFlag(GL_TRUE);
+
+    glVertex2f(-20.0f,-40.0f);
+    glVertex2f(0.0f, -80.0f);
+    glEdgeFlag(GL_FALSE);
+    glVertex2f(20.0f, -40.0f);
+    glEdgeFlag(GL_TRUE);
+
+    glVertex2f(20.0f, -40.0f);
+    glVertex2f(60.0f, -20.0f);
+    glEdgeFlag(GL_FALSE);
+    glVertex2f(20.0f, 0.0f);
+    glEdgeFlag(GL_TRUE);
+
+    glEdgeFlag(GL_FALSE);
+    glVertex2f(-20.0f, 0.0f);
+    glVertex2f(-20.0f,-40.0f);
+    glVertex2f(20.0f, 0.0f);
+
+    glVertex2f(-20.0f,-40.0f);
+    glVertex2f(20.0f, -40.0f);
+    glVertex2f(20.0f, 0.0f);
+    glEdgeFlag(GL_TRUE);
+
+  glEnd();
+}
+</code></pre>
+	  </section>
+	  <section data-tab="03" class="ui tab stacked moodle-book segment">
+	     <h1>Buffering</h1>
+<ul>
+<li>
+<p>So far your application have been single buffered.</p>
+</li>
+<li>
+<p>This is configured in main with GLUT_SINGLE</p>
+</li>
+</ul>
+<pre><code>  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+</code></pre>
+
+<ul>
+<li>and in renedScene() where the single buffer is flushed:</li>
+</ul>
+<pre><code>void renderScene(void)
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  starWithoutEdges();
+
+  glFlush();
+}
+</code></pre>
+
+<ul>
+<li>For complex models and animations it may be preferable to switch to double buffering. This involves specifying the GLUT_DOUBLE display mode:</li>
+</ul>
+<pre><code>  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+</code></pre>
+
+<ul>
+<li>
+<p>and using this methdod:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/resources/libraries/glut/spec3/node21.html">glutSwapBuffers</a></p>
+</li>
+<li>
+<p>instead of</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/sdk/docs/man/xhtml/glFlush.xml">glFlush</a></p>
+</li>
+<li>
+<p>This would be the default for many applications.</p>
+</li>
+<li>
+<p>In some circumstances you may require single buffering.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="Exercises" class="ui tab stacked moodle-book segment">
+	     <h1>Exercises</h1>
+<p>Review the <a href="http://www.opengl.org/sdk/docs/man/xhtml/glScissor.xml">glScissor</a></p>
+<p>Rework the rendering in this lab to only render the a rectangular portion of the screen.</p>
+	  </section>
+  <div class="ui fixed bottom borderless menu">'
+    <div class="ui small item"> 
+    <p id="footertext">
+    Prepared by  Eamonn de Leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+     <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+       target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+     </a>
+     </p>
+    </div>
+  </div>   
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-49703418-6']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>  </body>
+ </html>

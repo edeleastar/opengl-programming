@@ -1,0 +1,530 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+   
+     <title> Lab-07-A </title>
+   
+     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+     <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+     <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+   
+     <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+     <script src="./style/custom/jquery.address-1.6.min.js"></script>
+     <script src="./style/semantic/javascript/semantic.min.js"></script>
+   
+     <link rel="stylesheet" href="./style/highlight/school_book.css">
+     <script src="./style/highlight/highlight.pack.js"></script> 
+     <script>hljs.initHighlightingOnLoad();</script>
+   
+     <script src="./style/custom/common.js"> </script> 
+     <script src="./style/custom/main.js"> </script> 
+  </head>
+  <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../index.html">Wavefront, Models, Perspectives & Colour</a></header>
+    <div class="right tab-menu menu">
+          <a class="item" data-tab="Lab-07-A"> Lab-07-A </a>
+          <a class="item" data-tab="01"> 01 </a>
+          <a class="item" data-tab="02"> 02 </a>
+          <a class="item" data-tab="03"> 03 </a>
+          <a class="item" data-tab="04"> 04 </a>
+          <a class="item" data-tab="05"> 05 </a>
+          <a class="item" data-tab="06"> 06 </a>
+          <a class="item" data-tab="07"> 07 </a>
+          <a class="item" data-tab="08"> 08 </a>
+          <a class="item" data-tab="Exercises"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="Lab-07-A" class="ui tab stacked moodle-book segment">
+	     <h1>Objectives</h1>
+<ul>
+<li>Rework the model classes to be able to load and display multiple entities, consisting of both Triangles and Quads.</li>
+<li>To do this:</li>
+<li>Introduce a VertexGroup class to represent the 'default' group</li>
+<li>Rework Face to adapt to quad/triangle primitives</li>
+<li>Refactor ModelObject to a more flexible Mesh class</li>
+<li>Refactor Model to load and render multiple Mesh objects.</li>
+</ul>
+	  </section>
+	  <section data-tab="01" class="ui tab stacked moodle-book segment">
+	     <h1>Setup</h1>
+<ul>
+<li>
+<p>Duplicate the lab06c_wavefront_1 project, call the new one lab07a_wavefront_2.</p>
+</li>
+<li>
+<p>Here is a zip of the source code only for the 06c project in case you need it, but you should have it from the last lab.</p>
+</li>
+<li>
+<p><a href="archives/wavefront_1.zip">wavefront_1.zip</a></p>
+</li>
+<li>
+<p>This is a simple cube:</p>
+</li>
+<li>
+<p><a href="archives/cube.obj">cube.obj</a></p>
+</li>
+<li>
+<p>The project should load and display this accurately.</p>
+</li>
+<li>
+<p>This is a model of a cylinder:</p>
+</li>
+<li>
+<p><a href="archives/cylinder.obj">cylinder.obj</a></p>
+</li>
+<li>
+<p>What happens when this cylinder model is loaded?</p>
+</li>
+<li>
+<p>What differences are there in the model file that cause this load/render to fail?</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="02" class="ui tab stacked moodle-book segment">
+	     <h1>Refactor</h1>
+<ul>
+<li>
+<p>The name ModelObject is not very accurate, or satisfactory (using the word Object in a class name is problematic).</p>
+</li>
+<li>
+<p>Rename ModelObject to Mesh.  Renaming like this can be carried out in two ways:</p>
+</li>
+<li>
+<p>Manually - hunting down all references and changing them</p>
+</li>
+<li>
+<p>Using the refactoring menu - rely on Eclipse to do the above.</p>
+</li>
+<li>
+<p>The latter is considerable more effective. Select the class in the Project Explorer as shown:</p>
+</li>
+</ul>
+<p><img alt="" src="img/01.png"></p>
+<ul>
+<li>Select rename and enter the new name</li>
+</ul>
+<p><img alt="" src="img/02.png"></p>
+<ul>
+<li>You can even preview before committing:</li>
+</ul>
+<p><img alt="" src="img/03.png"></p>
+<ul>
+<li>
+<p>All references to the class name should be changed - check this (particularly in model.h/cpp)</p>
+</li>
+<li>
+<p>You will need to manually rename the source file names modelobject,h/cpp -&gt;mesh.h/cpp, which will also require a change in model.h/cpp</p>
+</li>
+<li>
+<p>Build and test</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="03" class="ui tab stacked moodle-book segment">
+	     <h1>Face</h1>
+<ul>
+<li>This is our current face class:</li>
+</ul>
+<pre><code>struct Face
+{
+  int vertices[3];
+  int textures[3];
+
+  Face(std::istream&amp;amp; is);
+  void render(std::vector &lt;Vector3&gt;&amp;amp;);
+};
+</code></pre>
+
+<ul>
+<li>...and its implementation:</li>
+</ul>
+<pre><code>Face::Face(istream&amp;amp; is)
+{
+  char ch1;
+  for (int i = 0; i &lt; 4; i++)
+  {
+    string separator;
+    is &gt;&gt; vertices[i];
+    is &gt;&gt; ch1;
+    is &gt;&gt; textures[i];
+  }
+}
+
+void Face::render(std::vector &lt;Vector3&gt;&amp;amp;defaultTable)
+{
+  glBegin(GL_QUADS);
+  for (int i=0; i&lt;4; i++)
+  {
+    glVertex3f( defaultTable[vertices[i] - 1].X,
+                defaultTable[vertices[i] - 1].Y,
+                defaultTable[vertices[i] - 1].Z );
+    cout &lt;&lt; defaultTable[vertices[i] - 1].X &lt;&lt; &quot; &quot; &lt;&lt; defaultTable[vertices[i] - 1].Y &lt;&lt; &quot; &quot; &lt;&lt; defaultTable[vertices[i] - 1].Z &lt;&lt; endl;
+  }
+  glEnd();
+}
+</code></pre>
+
+<ul>
+<li>It is based on an incomplete understanding of the mesh file, and will fail load our cylinder mode. In particular, these faces here from that model will not load:</li>
+</ul>
+<pre><code>...
+f 2/2 1/1 41/83
+f 3/3 2/2 41/83
+f 4/4 3/3 41/83
+...
+</code></pre>
+
+<ul>
+<li>Change the definition of the class as follows:</li>
+</ul>
+<pre><code>struct Face
+{
+  std::vector&lt;int&gt; vertexIndices;
+  std::vector&lt;int&gt; textureIndices;
+
+  Face(std::istream&amp;amp; is);
+  void render(std::vector &lt;Vector3&gt;&amp;amp;);
+};
+</code></pre>
+
+<ul>
+<li>
+<p>We can now accommodate any number of vertex/texture indices.</p>
+</li>
+<li>
+<p>To parse the line, er can make use of the stringstream class</p>
+</li>
+<li>
+<p>http://www.cplusplus.com/reference/iostream/stringstream/</p>
+</li>
+<li>
+<p>And rework the constructor as follows:</p>
+</li>
+</ul>
+<pre><code>#include &lt;sstream&gt;
+
+using namespace std;
+
+Face::Face(istream&amp;amp; is)
+{
+  string line;
+  getline (is, line);
+
+  stringstream allIndexSets (line);
+  string singleIndexSet;
+
+  while( getline(allIndexSets, singleIndexSet, ' ') )
+  {
+   if (singleIndexSet.size() &gt; 0)
+   {
+     string vertexIndex = singleIndexSet.substr(0, singleIndexSet.find('/'));
+     int index = atoi(vertexIndex.c_str());
+     vertexIndices.push_back(index);
+   }
+  }
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Note - this only populate the vereixIndices - not the textures.</p>
+</li>
+<li>
+<p>The render function is then generalised to cope with triangles or quads</p>
+</li>
+</ul>
+<pre><code>void Face::render(std::vector &lt;Vector3&gt;&amp;amp;vertexTable)
+{
+  vertexIndices.size() == 3?
+     glBegin(GL_TRIANGLES)
+    :glBegin(GL_QUADS);
+
+  for (unsigned int i=0; i&lt;vertexIndices.size(); i++)
+   {
+   glVertex3f( vertexTable[vertexIndices[i] - 1].X,
+               vertexTable[vertexIndices[i] - 1].Y,
+               vertexTable[vertexIndices[i] - 1].Z );
+   }
+   glEnd();
+}
+</code></pre>
+
+<ul>
+<li>The program should run:</li>
+</ul>
+<p><img alt="" src="img/04.png"></p>
+<ul>
+<li>You can see clearly the quads and triangles in action.</li>
+</ul>
+	  </section>
+	  <section data-tab="04" class="ui tab stacked moodle-book segment">
+	     <h1>Groups</h1>
+<ul>
+<li>
+<p>This is a maya scene here with two objects:</p>
+</li>
+<li>
+<p><a href="archives/model.mb">model.mb</a></p>
+</li>
+</ul>
+<p><img alt="" src="img/05.png"></p>
+<ul>
+<li>
+<p>This is the wavefront export:</p>
+</li>
+<li>
+<p><a href="archives/model.obj">model.obj</a></p>
+</li>
+<li>
+<p>If you locate all the 'g' entries, there will be four:</p>
+</li>
+</ul>
+<pre><code>...
+g default
+...
+g pCylinder1
+...
+g default
+...
+g pSphere1
+...
+</code></pre>
+
+<ul>
+<li>
+<p>'default' appearing twice.</p>
+</li>
+<li>
+<p>Try to load this file in our program:</p>
+</li>
+</ul>
+<p><img alt="" src="img/06.png"></p>
+<ul>
+<li>Clearly we need some refactoring</li>
+</ul>
+	  </section>
+	  <section data-tab="05" class="ui tab stacked moodle-book segment">
+	     <h1>VertexGroup</h1>
+<ul>
+<li>We will define an abstraction to specifically represent this default group:</li>
+</ul>
+<pre><code>struct VertexGroup
+{
+  std::vector &lt;Vector3&gt; vertices;
+
+  VertexGroup();
+  void load(std::istream&amp;amp;);
+};
+
+</code></pre>
+
+<pre><code>VertexGroup::VertexGroup()
+{}
+
+void VertexGroup::load(istream&amp;amp; is)
+{
+  string indicator;
+  bool stillGroup=true;
+  do
+  {
+    is &gt;&gt; indicator;
+    if (indicator == &quot;v&quot;)
+    {
+      vertices.push_back(Vector3(is));
+    }
+    else if (indicator == &quot;g&quot;)
+    {
+      stillGroup = false;
+    }
+    else
+    {
+      string buf;
+      getline(is, buf);
+    }
+  } while (stillGroup &amp;amp;&amp;amp; ##is.eof());
+  is.putback(indicator[0]);
+}
+</code></pre>
+	  </section>
+	  <section data-tab="06" class="ui tab stacked moodle-book segment">
+	     <h1>Model::load</h1>
+<ul>
+<li>The model then will need to maintain a single instance of this object:</li>
+</ul>
+<pre><code>struct Model
+{
+  //...
+  VertexGroup defaultGroup;
+  //...
+};
+</code></pre>
+
+<ul>
+<li>and we can revise the model::load as follows:</li>
+</ul>
+<pre><code>bool Model::load(istream&amp;amp; is)
+{
+  string indicator;
+  is &gt;&gt; indicator;
+  while (##is.eof())
+  {
+    if (indicator == &quot;#&quot;)
+    {
+      string buf;
+      getline(is, buf);
+    }
+    else if (indicator == &quot;g&quot;)
+    {
+      string name;
+      is &gt;&gt; name;
+      if (name == &quot;default&quot;)
+      {
+        defaultGroup.load(is);
+      }
+      else
+      {
+        Mesh a(name, is);
+        if (modelObjects.find(a.name) == modelObjects.end())
+        {
+          modelObjects[a.name] = a;
+        }
+      }
+    }
+    is &gt;&gt; indicator;
+  }
+  return true;
+}
+</code></pre>
+
+<ul>
+<li>Look carefully how we are dealing with groups</li>
+</ul>
+	  </section>
+	  <section data-tab="07" class="ui tab stacked moodle-book segment">
+	     <h1>Mesh</h1>
+<ul>
+<li>
+<p>Restructure Mesh class as follows:</p>
+</li>
+<li>
+<p>It now takes the name of the object as a constructor parameter</p>
+</li>
+<li>
+<p>We completely remove the Vertex3 array - it is no longer needed.</p>
+</li>
+</ul>
+<pre><code>struct Mesh
+{
+  std::string name;
+  std::vector&lt;Face&gt; faces;
+
+  Mesh();
+  Mesh(std::string name, std::istream&amp;amp;);
+  void render(std::vector &lt;Vector3&gt;&amp;amp;);
+};
+</code></pre>
+
+<ul>
+<li>The Mesh constructor can be simplified, as we are no longer interested in identifying vertices:</li>
+</ul>
+<pre><code>Mesh::Mesh(string groupName, istream&amp;amp; is)
+: name(groupName)
+{
+  string indicator;
+  bool stillGroup=true;
+  do
+  {
+    is &gt;&gt; indicator;
+    if (indicator == &quot;f&quot;)
+    {
+      faces.push_back(Face(is));
+    }
+    else if (indicator == &quot;g&quot;)
+    {
+      stillGroup = false;
+    }
+    else
+    {
+      string buf;
+      getline(is, buf);
+    }
+  } while (stillGroup &amp;amp;&amp;amp; ##is.eof());
+  is.putback(indicator[0]);
+}
+</code></pre>
+	  </section>
+	  <section data-tab="08" class="ui tab stacked moodle-book segment">
+	     <h1>Model::render</h1>
+<ul>
+<li>Model::render can now be simplified</li>
+</ul>
+<pre><code>void Model::render()
+{
+  for (ModelMapIterator iter = modelObjects.begin(); iter ##= modelObjects.end(); iter++)
+  {
+    iter-&gt;second.render(defaultGroup.vertices);
+  }
+}
+</code></pre>
+
+<ul>
+<li>Our model should render:</li>
+</ul>
+<p><img alt="" src="img/07.png"></p>
+	  </section>
+	  <section data-tab="Exercises" class="ui tab stacked moodle-book segment">
+	     <h1>Exercises</h1>
+<h2>Exercise 1:Additional objects</h2>
+<ul>
+<li>
+<p>Experiment with additional entities in the model, verify that they can be loaded and rendered successfully</p>
+</li>
+<li>
+<p>You may need to 'zoom out' to see these additional objects.</p>
+</li>
+</ul>
+<h2>Exercise 2: Perspective</h2>
+<ul>
+<li>
+<p>Change the Projection back to orthographic. What effect does it have on the rendered models?</p>
+</li>
+<li>
+<p>Design and implement a extension to the classes devised to date to make the perspective selectable, perhaps even without a restart. For instance a specific key combination could switch to/from orthographic/perspective</p>
+</li>
+</ul>
+<h2>Exercise 3: Camera</h2>
+<ul>
+<li>In earlier labs, we implemented a rudimentary mechanism for navigation a scene. Propose and implement a design whereby this is modeled as a Camera abstraction - that is placed within a scene and can be moved around via some keybaord sequences</li>
+</ul>
+	  </section>
+  <div class="ui fixed bottom borderless menu">'
+    <div class="ui small item"> 
+    <p id="footertext">
+    Prepared by  Eamonn de Leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+     <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+       target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+     </a>
+     </p>
+    </div>
+  </div>   
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-49703418-6']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>  </body>
+ </html>

@@ -1,0 +1,320 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+   
+     <title> Lab-01-C </title>
+   
+     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+     <link rel="stylesheet" href="./style/semantic/css/semantic.min.css" type="text/css">  
+     <link rel="stylesheet" href="./style/custom/main.css" type="text/css"> 
+   
+     <script src="./style/custom/jquery-2.1.0.min.js"></script> 
+     <script src="./style/custom/jquery.address-1.6.min.js"></script>
+     <script src="./style/semantic/javascript/semantic.min.js"></script>
+   
+     <link rel="stylesheet" href="./style/highlight/school_book.css">
+     <script src="./style/highlight/highlight.pack.js"></script> 
+     <script>hljs.initHighlightingOnLoad();</script>
+   
+     <script src="./style/custom/common.js"> </script> 
+     <script src="./style/custom/main.js"> </script> 
+  </head>
+  <body>
+  <nav class="ui fixed top pointing borderless inverted menu">
+    <header class="header item"> <a href="../index.html">Introduction</a></header>
+    <div class="right tab-menu menu">
+          <a class="item" data-tab="Lab-01-C"> Lab-01-C </a>
+          <a class="item" data-tab="01"> 01 </a>
+          <a class="item" data-tab="02"> 02 </a>
+          <a class="item" data-tab="03"> 03 </a>
+          <a class="item" data-tab="Exercises"> Exercises </a>
+    </div>
+  </nav>
+
+  <br>
+
+	  <section data-tab="Lab-01-C" class="ui tab stacked moodle-book segment">
+	     <h1>Objectives</h1>
+<ul>
+<li>Understand the role of timers in glut</li>
+<li>Be able to set a simple timer based animation in motion</li>
+<li>Understand the difference between timer and idle based animation, and have composed an equivalent animation using both techniques</li>
+</ul>
+	  </section>
+	  <section data-tab="01" class="ui tab stacked moodle-book segment">
+	     <h1>Lab Setup</h1>
+<ul>
+<li>
+<p>In eclipse project explorer, copy lab01b_aspect_ratio, and call new project lab01c_simple_animation</p>
+</li>
+<li>
+<p>rename reshape.cpp to bounce.cpp</p>
+</li>
+<li>
+<p>verify that project builds and runs successfully.</p>
+</li>
+<li>
+<p>We need access to the window "world" co-ordinates - so create two global variables</p>
+</li>
+</ul>
+<pre><code>int windowWidth;
+int windowHeight;
+</code></pre>
+
+<ul>
+<li>Reactor the changeSize method to keep the world coordinate in these variables:</li>
+</ul>
+<pre><code>  if (w &lt;= h)
+  {
+    windowWidth = 100;
+    windowHeight = 100 / aspectRatio;
+    glOrtho(-100.0, 100.0, -windowHeight, windowHeight, 1.0, -1.0);
+  }
+  else
+  {
+    windowWidth = 100 * aspectRatio;
+    windowHeight = 100;
+    glOrtho(-windowWidth, windowWidth, -100.0, 100.0, 1.0, -1.0);
+  }
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test.</p>
+</li>
+<li>
+<p>In addition, we will store the actual location of the rectangle in x, and y globals:</p>
+</li>
+</ul>
+<pre><code>float x = -25.0f;
+float y =  25.0f;
+</code></pre>
+
+<ul>
+<li>When we redraw the rectangle, us these variables instead:</li>
+</ul>
+<pre><code>  glRectf(x, y, x+50, y-50);
+  //glRectf(-25.0f, 25.0f, 25.0f, -25.0f);
+</code></pre>
+
+<ul>
+<li>Build and test</li>
+</ul>
+	  </section>
+	  <section data-tab="02" class="ui tab stacked moodle-book segment">
+	     <h1>Timers</h1>
+<ul>
+<li>
+<p>Read the documentation on the following</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node64.html#SECTION000819000000000000000">glutTimerFunc</a></p>
+</li>
+<li>
+<p>Introduce a new function to act as the timer callback:</p>
+</li>
+</ul>
+<pre><code>void timerFunction(int value)
+{
+}
+</code></pre>
+
+<ul>
+<li>In main, set a timer to trigger after 33 milliseconds, and call this method:</li>
+</ul>
+<pre><code>  glutTimerFunc(33, timerFunction, 1);
+</code></pre>
+
+<ul>
+<li>
+<p>Using the debugger, verify that this method is called //once only//</p>
+</li>
+<li>
+<p>We would like to redraw the box in a different position on each triggering of the timer. This version of the timerFunc here is a start:</p>
+</li>
+</ul>
+<pre><code>  static float xstep = 1.0f;
+  static float ystep = 1.0f;
+  if (x &gt; windowWidth - 50 || x &lt; -windowWidth)
+    xstep = -xstep;
+
+  if (y &gt; windowHeight || y &lt; -windowHeight + 50)
+    ystep = -ystep;
+
+  x += xstep;
+  y += ystep;
+  cout &lt;&lt; &quot;x:&quot; &lt;&lt; x &lt;&lt; &quot; y:&quot; &lt;&lt; y &lt;&lt; endl;
+</code></pre>
+
+<ul>
+<li>
+<p>Build and execute. Note that it seems to be called only once, outputting "x:-24 y:26"</p>
+</li>
+<li>
+<p>This is because the timer is not iterative - it sets up a single call. To have this called every 33 ns, we need to set it at the end of each call:</p>
+</li>
+</ul>
+<pre><code>  glutTimerFunc(33, timerFunction, 1);
+</code></pre>
+
+<ul>
+<li>
+<p>Build and test. This time, debug is showing x,y being updated - but no chance on screen.</p>
+</li>
+<li>
+<p>Have a look at this glut method:</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node20.html#SECTION00055000000000000000">glutPostRedisplay</a></p>
+</li>
+<li>
+<p>Incorporate a call to this method at the end of timerFunc.</p>
+</li>
+<li>
+<p>Build and test. Resize the window during execution to get more interesting behaviour.</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="03" class="ui tab stacked moodle-book segment">
+	     <h1>Refactor</h1>
+<ul>
+<li>
+<p>The timerFunc should refactored, decoupling the updating of the "world" (i.e. moving the co-ordinates of the square) into a separate method.</p>
+</li>
+<li>
+<p>Call this method "update" and have the timers method call it on every timer "tick".</p>
+</li>
+</ul>
+	  </section>
+	  <section data-tab="Exercises" class="ui tab stacked moodle-book segment">
+	     <h1>Exercises</h1>
+<h2>1.Timing</h2>
+<ul>
+<li>
+<p>Experiment with different values for the timer callback - particular observer the behavior for smaller values.</p>
+</li>
+<li>
+<p>Also experiment with the step size.</p>
+</li>
+<li>
+<p>Experiment with different dimensions for the rectangle. Devise a simple way of having the rectangle dimensions specified in a single const.</p>
+</li>
+</ul>
+<h2>2.Idle loop</h2>
+<ul>
+<li>
+<p>There is a glut function which allows an "idle" funcion to be registered"</p>
+</li>
+<li>
+<p><a href="http://www.opengl.org/documentation/specs/glut/spec3/node63.html#SECTION000818000000000000000">glutIdleFunc</a></p>
+</li>
+<li>
+<p>Refactor the current implementation to use this for the animation, instead of the timer.</p>
+</li>
+<li>
+<p>First step would be to write and register an idle callback:</p>
+</li>
+</ul>
+<pre><code>void idleFunction()
+{
+}
+
+int main(int argc, char* argv[])
+{
+  //...
+  glutIdleFunc(idleFunction);
+  //...
+}
+</code></pre>
+
+<ul>
+<li>Having disabled the timerFunc registration, you could call update() from within this idle function.</li>
+</ul>
+<pre><code>void idleFunction()
+{
+  update();
+  glutPostRedisplay();
+}
+</code></pre>
+
+<ul>
+<li>
+<p>Try it - clearly not very satisfactory.</p>
+</li>
+<li>
+<p>One simple technique would be to read the system clock in each idle loop and, if a given time has elapsed (say 25 milliseconds), then do an update. This should more or less mimic the behavour of the timer version.</p>
+</li>
+<li>
+<p>First step would be to introduce static variable to remember time of the last call, and make sure this is initialised the first time the idle loop is called:</p>
+</li>
+</ul>
+<pre><code>  static clock_t lastTime = 0;
+
+  if (lastTime == 0)
+    lastTime = clock();
+</code></pre>
+
+<ul>
+<li>Now get the current time, and the time elapsed since last time was called, in seconds:</li>
+</ul>
+<pre><code>  clock_t currTime = clock();
+  clock_t deltaTime = currTime - lastTime;
+  float secondsDelta = (float)deltaTime/CLOCKS_PER_SEC;
+</code></pre>
+
+<ul>
+<li>and finally, if more than 25 milliseconds have elapsed, trigger the update, as well as updating lasttime:</li>
+</ul>
+<pre><code>  if (secondsDelta &gt;= 0.025)
+  {
+    update();
+    lastTime = currTime;
+    glutPostRedisplay();
+  }
+</code></pre>
+
+<ul>
+<li>
+<p>Execute and experiment with different intervals.</p>
+</li>
+<li>
+<p>Is there any noticeable difference between the operation of this technique and the timers?</p>
+</li>
+</ul>
+<h2>3. Another Rectangle</h2>
+<ul>
+<li>
+<p>Create another rectangle - green this time.</p>
+</li>
+<li>
+<p>Place it below the red rectangle, and have it move in the opposite direction.</p>
+</li>
+</ul>
+	  </section>
+  <div class="ui fixed bottom borderless menu">'
+    <div class="ui small item"> 
+    <p id="footertext">
+    Prepared by  Eamonn de Leastar (edeleastar@wit.ie). Except where otherwise noted, this content is licensed under a  
+     <a  href="http://creativecommons.org/licenses/by-nc/4.0/" title="External link to http://creativecommons.org/licenses/by-nc/4.0/" 
+       target="_blank">Creative Commons Attribution-NonCommercial 4.0 License
+     </a>
+     </p>
+    </div>
+  </div>   
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-49703418-6']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>  </body>
+ </html>
